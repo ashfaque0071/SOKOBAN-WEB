@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "macOS",
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c99",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/src/core",
+                "${workspaceFolder}/src/audio",
+                "${workspaceFolder}/src/screens",
+                "${workspaceFolder}/src/render"
+            ]
+        }
+    ],
+    "version": 4
+}

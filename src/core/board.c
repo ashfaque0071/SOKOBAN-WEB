@@ -1,0 +1,537 @@
+#include<stdio.h>
+#include "board.h"
+#include "raylib.h"
+#include"colors.h"
+#include "assets.h"
+#include "audio.h"
+
+#define MOVE_DELAY 0.25f
+
+static int moveHoldToRepeat = 1;
+static float moveRepeatDelay = MOVE_DELAY;
+
+void BoardSetMovement(int holdToRepeat, float repeatDelay)
+{
+    moveHoldToRepeat = holdToRepeat;
+    moveRepeatDelay = repeatDelay;
+}
+
+static int DirectionHeld(int keyA, int keyB)
+{
+    if (moveHoldToRepeat)
+        return IsKeyDown(keyA) || IsKeyDown(keyB);
+    return IsKeyPressed(keyA) || IsKeyPressed(keyB);
+}
+
+static void BoardMovePlayer(Board *board, int rowChange, int colChange);
+static void DrawTile(Texture2D tex, float dest_x, float dest_y, float tile);
+static void DrawWallTile(Assets *asset, int dest_x, int dest_y, int tile);
+static void DrawGoalTile(Assets *asset, int dest_x, int dest_y, int tile);
+static void DrawBox(Assets *asset, int dest_x, int dest_y, int tile, int onTarget);
+static void DrawPlayer(const Board *board, Assets *asset, int dest_x, int dest_y, int tile);
+
+char levels[LEVEL_COUNT][ROWS][COLS + 1] = {
+    {"_______________",
+     "__##########___",
+     "__#        #___",
+     "__#  $  .  #___",
+     "__#        #___",
+     "__#  @     #___",
+     "__#     $  #___",
+     "__#  .     #___",
+     "__##########___",
+     "_______________"},
+    {"_______________",
+     "_______________",
+     "____####_______",
+     "____#  ####____",
+     "____# . . #____",
+     "____# $$#@#____",
+     "____##    #____",
+     "_____######____",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "____####_______",
+     "____#  ###_____",
+     "____# $$ #_____",
+     "____#... #_____",
+     "____# @$ #_____",
+     "____#   ##_____",
+     "____#####______",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "____#######____",
+     "____#     #____",
+     "____# .$. #____",
+     "___## $@$ #____",
+     "___#  .$. #____",
+     "___#      #____",
+     "___########____",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "____#####______",
+     "____#.  ##_____",
+     "____#@$$ #_____",
+     "____##   #_____",
+     "_____##  #_____",
+     "______##.#_____",
+     "_______###_____",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "____#####______",
+     "____#   #______",
+     "____# @ #______",
+     "____# $$###____",
+     "____##. . #____",
+     "_____#    #____",
+     "_____######____",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "_______________",
+     "_____####______",
+     "___###  ####___",
+     "___#     $ #___",
+     "___# #  #$ #___",
+     "___# . .#@ #___",
+     "___#########___",
+     "_______________",
+     "_______________"},
+    {"____#####______",
+     "____#   ###____",
+     "____#. .  #____",
+     "____#   # #____",
+     "____## #  #____",
+     "_____#@$$ #____",
+     "_____#    #____",
+     "_____#  ###____",
+     "_____####______",
+     "_______________"},
+    {"_______________",
+     "___#####_______",
+     "___#   ##______",
+     "___# $  #______",
+     "___## $ ####___",
+     "____###@.  #___",
+     "_____#  .# #___",
+     "_____#     #___",
+     "_____#######___",
+     "_______________"},
+    {"_______________",
+     "___#######_____",
+     "___#     ###___",
+     "___#  @$$..#___",
+     "___#### ## #___",
+     "_____#     #___",
+     "_____#  ####___",
+     "_____#  #______",
+     "_____####______",
+     "_______________"},
+    {"____#######____",
+     "____#     #____",
+     "____#. .  #____",
+     "____# ## ##____",
+     "____#  $ #_____",
+     "____###$ #_____",
+     "______#@ #_____",
+     "______#  #_____",
+     "______####_____",
+     "_______________"},
+    {"_______________",
+     "_____######____",
+     "_____#    #____",
+     "_____# ##@##___",
+     "___### # $ #___",
+     "___# ..# $ #___",
+     "___#       #___",
+     "___#  ######___",
+     "___####________",
+     "_______________"},
+    {"_______________",
+     "___#######_____",
+     "__## ....##____",
+     "__#   ######___",
+     "__#   $ $ @#___",
+     "__###  $ $ #___",
+     "____###    #___",
+     "______######___",
+     "_______________",
+     "_______________"},
+    {"_______________",
+     "_______####____",
+     "_____###  ##___",
+     "____## $   #___",
+     "___## $  # #___",
+     "___# @#$$  #___",
+     "___# ..  ###___",
+     "___# ..###_____",
+     "___#####_______",
+     "_______________"},
+    {"__####_________",
+     "__#  #____#####",
+     "__#  #____#   #",
+     "__#  ######.# #",
+     "####  $    .  #",
+     "#   $$# ###.# #",
+     "#   #   #_#   #",
+     "#########_#@ ##",
+     "__________#  #_",
+     "__________####_"},
+    {"_______________",
+     "_____####______",
+     "_#####  #______",
+     "_#     $#######",
+     "## ## ..#  ...#",
+     "# $ $$#$  @   #",
+     "#        ###  #",
+     "#######  #_####",
+     "______####_____",
+     "_______________"}};
+
+const char *BoardLevelRow(int levelIndex, int row)
+{
+    if (levelIndex < 0 || levelIndex >= LEVEL_COUNT)
+        return NULL;
+    if (row < 0 || row >= ROWS)
+        return NULL;
+    return levels[levelIndex][row];
+}
+
+void BoardInit(Board *board)
+{
+
+    *board = (Board){0};
+
+    board->faceRow = 1;
+    board->faceCol = 0;
+
+    BoardLoadLevel(board, 0);
+}
+void BoardLoadLevel(Board *board,int index)
+{
+
+    if (index < 0)
+        index = 0;
+    if (index >= LEVEL_COUNT)
+        index = LEVEL_COUNT - 1;
+
+    board->currentLevel = index;
+    board->moveCount = 0;
+    board->pushCount = 0;
+    board->levelSolved = 0;
+    board->push_pose_timer = 0;
+    board->historyCount = 0;
+    board->moveTimer = 0.0f;
+
+    board->faceRow = 1;
+    board->faceCol = 0;
+
+    for (int r = 0; r < ROWS; r++)
+    {
+        for (int c = 0; c < COLS; c++)
+        {
+            char ch = levels[index][r][c];
+
+            board->boxes[r][c] = 0;
+
+            if (ch == '_')
+                board->map[r][c] = VOID;
+            else if (ch == '#')
+                board->map[r][c] = WALL;
+            else if (ch == '.')
+                board->map[r][c] = TARGET;
+            else
+                board->map[r][c] = FLOOR;
+
+            if (ch == '$')
+                board->boxes[r][c] = 1;
+
+            if (ch == '@')
+            {
+                board->playerRow = r;
+                board->playerCol = c;
+            }
+        }
+    }
+}
+void BoardUpdate(Board *board,float deltaTime)
+{
+
+    if (board->push_pose_timer > 0.0f) {
+        board->push_pose_timer -= deltaTime;
+    }
+
+    if (board->moveTimer > 0.0f) {
+        board->moveTimer -= deltaTime;
+    }
+
+    if (board->levelSolved) {
+        return;
+    }
+
+    int rowChange = 0;
+    int columnChange = 0;
+
+    if (DirectionHeld(KEY_UP, KEY_W)) {
+        rowChange = -1;
+    }
+    else if (DirectionHeld(KEY_DOWN, KEY_S)) {
+        rowChange = 1;
+    }
+    else if (DirectionHeld(KEY_LEFT, KEY_A)) {
+        columnChange = -1;
+    }
+    else if (DirectionHeld(KEY_RIGHT, KEY_D)) {
+        columnChange = 1;
+    }
+
+    if (rowChange == 0 && columnChange == 0) {
+        board->moveTimer = 0.0f;
+        return;
+    }
+
+    if (board->moveTimer <= 0.0f) {
+        BoardMovePlayer(board,rowChange, columnChange);
+        board->moveTimer = moveRepeatDelay;
+    }
+}
+
+int InsideGrid(int r, int c)
+{
+    if (r < 0 || r >= ROWS)
+        return 0;
+    if (c < 0 || c >= COLS)
+        return 0;
+    return 1;
+}
+
+int CheckSolved(Board*board)
+{
+    for (int r = 0; r < ROWS; r++)
+    {
+        for (int c = 0; c < COLS; c++)
+        {
+            if (board->boxes[r][c] == 1 && board->map[r][c] != TARGET)
+                return 0;
+        }
+    }
+    return 1;
+}
+
+static void BoardMovePlayer(Board *board,int rowChange, int colChange)
+{
+
+    int previousFaceRow = board->faceRow;
+    int previousFaceCol = board->faceCol;
+    board->faceCol = colChange;
+    board->faceRow = rowChange;
+
+    int newRow = board->playerRow + rowChange;
+    int newCol = board->playerCol + colChange;
+    int pushedBox = 0;
+    int boxReachedGoal = 0;
+
+    if (!InsideGrid(newRow, newCol))
+    {
+        AudioPlay(SFX_BLOCKED);
+        return;
+    }
+    if (board->map[newRow][newCol] == WALL || board->map[newRow][newCol] == VOID)
+    {
+        AudioPlay(SFX_BLOCKED);
+        return;
+    }
+
+    if (board->boxes[newRow][newCol] == 1)
+    {
+        int boxRow = newRow + rowChange;
+        int boxCol = newCol + colChange;
+
+        if (!InsideGrid(boxRow, boxCol))
+        {
+            AudioPlay(SFX_BLOCKED);
+            return;
+        }
+        if (board->map[boxRow][boxCol] == WALL || board->map[boxRow][boxCol] == VOID)
+        {
+            AudioPlay(SFX_BLOCKED);
+            return;
+        }
+
+        if (board->boxes[boxRow][boxCol] == 1)
+        {
+            AudioPlay(SFX_BLOCKED);
+            return;
+        }
+    }
+
+    if (board->historyCount == UNDO_LIMIT)
+    {
+        for (int i = 1; i < UNDO_LIMIT; i++)
+            board->history[i - 1] = board->history[i];
+        board->historyCount--;
+    }
+    BoardMove *step = &board->history[board->historyCount++];
+    step->playerRow = board->playerRow;
+    step->playerCol = board->playerCol;
+    step->faceRow = previousFaceRow;
+    step->faceCol = previousFaceCol;
+    step->boxFromRow = -1;
+
+    if (board->boxes[newRow][newCol] == 1)
+    {
+        int boxRow = newRow + rowChange;
+        int boxCol = newCol + colChange;
+        board->boxes[newRow][newCol] = 0;
+        board->boxes[boxRow][boxCol] = 1;
+        step->boxFromRow = newRow;
+        step->boxFromCol = newCol;
+        step->boxToRow = boxRow;
+        step->boxToCol = boxCol;
+        board->pushCount++;
+        board->push_pose_timer = 0.18;
+        pushedBox = 1;
+        boxReachedGoal = (board->map[boxRow][boxCol] == TARGET);
+    }
+
+    board->playerRow = newRow;
+    board->playerCol = newCol;
+    board->moveCount++;
+
+    if (CheckSolved(board))
+    {
+        board->levelSolved = 1;
+
+        AudioPlay(SFX_LEVEL_COMPLETE);
+    }
+    else if (boxReachedGoal)
+        AudioPlay(SFX_GOAL);
+    else
+        AudioPlay(pushedBox ? SFX_PUSH : SFX_STEP);
+}
+
+int BoardUndo(Board *board)
+{
+    if (board->levelSolved || board->historyCount == 0)
+        return 0;
+
+    BoardMove step = board->history[--board->historyCount];
+
+    if (step.boxFromRow >= 0)
+    {
+        board->boxes[step.boxToRow][step.boxToCol] = 0;
+        board->boxes[step.boxFromRow][step.boxFromCol] = 1;
+        board->pushCount--;
+    }
+
+    board->playerRow = step.playerRow;
+    board->playerCol = step.playerCol;
+    board->faceRow = step.faceRow;
+    board->faceCol = step.faceCol;
+    board->moveCount--;
+    board->push_pose_timer = 0.0f;
+
+    AudioPlay(SFX_UNDO);
+    return 1;
+}
+
+void BoardDraw(const Board *board, Assets *asset, int originX, int originY, int tile)
+{
+    for (int r = 0; r < ROWS; r++)
+    {
+        for (int c = 0; c < COLS; c++)
+        {
+            int dest_x = originX + c * tile;
+            int dest_y = originY + r * tile;
+
+            if (board->map[r][c] == VOID)
+                continue;
+
+            if (board->map[r][c] == WALL)
+            {
+                DrawWallTile(asset,dest_x, dest_y, tile);
+
+                DrawRectangleLinesEx((Rectangle){dest_x, dest_y, tile, tile}, 2, Fade(BLACK, 0.75f));
+            }
+            else
+            {
+
+                if ((r + c) % 2 == 0)
+                    DrawTile(asset->texFloorA, dest_x, dest_y, tile);
+                else
+                    DrawTile(asset->texFloorB, dest_x, dest_y, tile);
+
+                DrawRectangle(dest_x, dest_y, tile, tile, Fade(RAYWHITE, 0.18f));
+                DrawRectangleLinesEx((Rectangle){dest_x, dest_y, tile, tile}, 1, Fade(COL_BG, 0.45f));
+
+                if (board->map[r][c] == TARGET)
+                    DrawGoalTile(asset,dest_x, dest_y, tile);
+            }
+        }
+    }
+
+    for (int r = 0; r < ROWS; r++)
+    {
+        for (int c = 0; c < COLS; c++)
+        {
+            if (board->boxes[r][c] == 1)
+            {
+                DrawBox(asset,originX+c*tile, originY + r * tile, tile, board->map[r][c] == TARGET);
+            }
+        }
+    }
+
+    DrawPlayer(board,asset,originX + board->playerCol * tile, originY + board->playerRow * tile, tile);
+}
+
+static void DrawTile(Texture2D tex, float dest_x, float dest_y, float tile)
+{
+    Rectangle source = {0, 0, tex.width, tex.height};
+    Rectangle destination = {dest_x, dest_y, tile, tile};
+    Vector2 origin = {0, 0};
+
+    DrawTexturePro(tex, source, destination, origin, 0, WHITE);
+}
+
+static void DrawWallTile(Assets *asset,int dest_x, int dest_y, int tile)
+{
+    DrawTile(asset->texWallCap , dest_x, dest_y, tile);
+}
+
+static void DrawGoalTile(Assets * asset,int dest_x, int dest_y, int tile)
+{
+    DrawTile(asset->texTarget, dest_x, dest_y, tile);
+}
+
+static void DrawBox(Assets * asset,int dest_x, int dest_y, int tile, int onTarget)
+{
+    if (onTarget)
+        DrawTile(asset->texBoxDone, dest_x, dest_y, tile);
+    else
+        DrawTile(asset->texBox, dest_x, dest_y, tile);
+}
+
+static void DrawPlayer(const Board*board,Assets * asset,int dest_x, int dest_y, int tile)
+{
+
+    Texture2D tex = board->push_pose_timer > 0 ? asset->texPlayerPushDown : asset->texPlayerDown;
+
+    if (board->faceRow == -1)
+        tex = board->push_pose_timer > 0 ? asset->texPlayerPushUp : asset->texPlayerUp;
+    else if (board->faceRow == 1)
+        tex = board->push_pose_timer > 0 ? asset->texPlayerPushDown : asset->texPlayerDown;
+    else if (board->faceCol == -1)
+        tex = board->push_pose_timer > 0 ? asset->texPlayerPushLeft : asset->texPlayerLeft;
+    else if (board->faceCol == 1)
+        tex = board->push_pose_timer > 0 ? asset->texPlayerPushRight : asset->texPlayerRight;
+
+    float width = tile * ((float)tex.width / tex.height);
+    Rectangle source = {0, 0, tex.width, tex.height};
+
+    Rectangle destination = {dest_x + (tile - width) / 2, dest_y, width, tile};
+    DrawTexturePro(tex, source, destination, (Vector2){0, 0}, 0, WHITE);
+}

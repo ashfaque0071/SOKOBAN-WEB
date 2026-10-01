@@ -45,7 +45,6 @@ static const CreditRow ROW[] = {
     {"IMTIAZ AHMED(2505113)", NULL},
 
     {"BG MUSIC",         "SPIDER-MAN THEME SONG(INSTRUMENTAL)"},
-    {"",                   ""},
     {"SFX LEVEL CLEAR",  "VENOM THEME SONG"},
     {"ASSETS",           "SPIDER-NOIR THEMED"}
 };

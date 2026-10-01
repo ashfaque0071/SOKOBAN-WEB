@@ -59,7 +59,7 @@ static float effectsVolume = 0.80f;
 static bool  muted = false;
 
 #define MUSIC_PAUSE_DUCK 0.35f
-#define MUSIC_SOLVED_DUCK 0.15f
+#define MUSIC_SOLVED_DUCK 0.0f
 #define MUSIC_DUCK_RATE 6.0f
 
 static float musicDuck = 1.0f;
@@ -192,9 +192,17 @@ void AudioUpdate(float deltaTime, bool paused, bool solved)
         if (solved)      duckTarget = MUSIC_SOLVED_DUCK;
         else if (paused) duckTarget = MUSIC_PAUSE_DUCK;
 
-        float ease = deltaTime * MUSIC_DUCK_RATE;
-        if (ease > 1.0f) ease = 1.0f;
-        musicDuck += (duckTarget - musicDuck) * ease;
+        if (solved)
+        {
+            // Give the level-complete cue exclusive playback immediately.
+            musicDuck = duckTarget;
+        }
+        else
+        {
+            float ease = deltaTime * MUSIC_DUCK_RATE;
+            if (ease > 1.0f) ease = 1.0f;
+            musicDuck += (duckTarget - musicDuck) * ease;
+        }
 
         musicMuffle = (1.0f - musicDuck) / (1.0f - MUSIC_PAUSE_DUCK);
         if (musicMuffle < 0.0f) musicMuffle = 0.0f;
@@ -265,6 +273,10 @@ void AudioSetNonGameplayActive(bool active)
 {
     if (active == menuMusicActive)
         return;
+
+    // A completion cue must never carry over into menu or level-select music.
+    if (active)
+        AudioStop(SFX_LEVEL_COMPLETE);
 
     Music *oldMusic = menuMusicActive ? &menuMusic : &music;
     if (oldMusic->frameCount > 0)

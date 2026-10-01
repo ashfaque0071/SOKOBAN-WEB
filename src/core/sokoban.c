@@ -99,10 +99,10 @@ int main(void)
 
     while (!WindowShouldClose())
     {
-        bool isNonGameplayScreen = showMenu || showLevelSelect ||
+        bool useMenuMusic = showMenu || showLevelSelect ||
             showSettings || showCheatsheet || showHighScores ||
-            showControls || showCredits || isPaused || board.levelSolved;
-        AudioSetNonGameplayActive(isNonGameplayScreen);
+            showControls || showCredits;
+        AudioSetNonGameplayActive(useMenuMusic);
 
         AudioUpdate(GetFrameTime(), isPaused && !showSettings,
                     board.levelSolved != 0);

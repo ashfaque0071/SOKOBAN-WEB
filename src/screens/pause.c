@@ -76,8 +76,7 @@ static void DrawPauseStatus(Font font, const Board *board,
 
     DrawTextEx(font, moves, (Vector2){x, y}, fontSize, spacing, color);
     x += movesSize.x;
-    DrawCircleV((Vector2){x + separatorSpace / 2.0f,
-                          y + movesSize.y * 0.53f},
+    DrawCircleV((Vector2){x + separatorSpace / 2.0f, y + movesSize.y * 0.53f},
                 fontSize * 0.075f, color);
     x += separatorSpace;
 

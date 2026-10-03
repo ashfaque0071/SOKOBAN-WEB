@@ -170,7 +170,6 @@ build script copies it automatically.
 ├── assets/          Textures, fonts, shaders, music, and sound effects
 ├── build/           Compiled executable and Windows runtime DLL
 ├── data/            Persistent progress and settings
-├── docs/            Level cheatsheet and third-party license notices
 ├── include/         Bundled raylib 5.5 headers for the Windows build
 ├── lib/             Bundled Windows raylib libraries and DLL
 ├── src/
@@ -200,8 +199,8 @@ Key modules include:
 - `src/screens/`: menu, settings, pause, level-select, completion, controls,
   credits, high-score, and cheatsheet screens.
 
-The optional solution reference in `docs/LEVEL_CHEATSHEET.md` lists a complete
-move sequence for every level.
+The in-game Cheatsheets screen provides a solution reference for each unlocked
+level.
 
 ## Troubleshooting
 
@@ -251,15 +250,7 @@ Check that master sound is enabled and both volume sliders are above zero in
 Settings. Also verify that the operating system has an active audio output
 device. The music and sound-effect files are loaded from `assets/audio/`.
 
-## Third-party notices
+## Third-party components
 
-The bundled Windows headers and libraries are raylib 5.5. Its license is in
-`docs/licenses/raylib_LICENSE.txt`. Font license notices are stored beside the
-fonts:
-
-- `assets/fonts/LICENSE-RobotoSlab.txt`
-- `assets/fonts/OFL-Oswald.txt`
-- `assets/fonts/OFL-Rye.txt`
-
-No separate license for the remaining project code or assets is declared in
-this repository.
+The repository bundles raylib 5.5 headers and libraries for Windows. The
+included raylib headers retain their upstream license notice.

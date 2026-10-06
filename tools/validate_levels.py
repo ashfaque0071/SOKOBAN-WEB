@@ -26,6 +26,9 @@ route_entries = re.findall(
     r'\{\s*((?:"[^"]*"\s*)+),\s*(\d+),\s*(\d+)\s*\}', route_data
 )
 assert len(route_entries) == COUNT, "wrong number of solution routes"
+route_moves = [int(moves) for _, moves, _ in route_entries]
+assert route_moves == sorted(route_moves), "levels are not ordered by route length"
+assert route_moves[-1] > 900, "missing the 900+ move marathon level"
 
 score_data = SCORE.split("MINIMUM_PUSHES[LEVEL_COUNT] = {", 1)[1].split("};", 1)[0]
 thresholds = [int(n) for n in re.findall(r"\d+", score_data)]

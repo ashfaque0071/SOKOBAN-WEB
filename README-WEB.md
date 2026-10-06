@@ -18,7 +18,7 @@ The web build needs Emscripten, raylib 6.0 compiled for WebGL 2, `sips`,
 The menu's art, fonts and sounds are preloaded with the game code. After the
 menu appears, `content.data` downloads in the background. Choosing Continue,
 Level Select, Settings, or Credits while it is downloading shows a percentage
-and waits for the required files. The 48 level layouts themselves are only a
+and waits for the required files. The 49 level layouts themselves are only a
 few kilobytes and are compiled into WebAssembly; shared gameplay art and other
 screens make up the background package. The package is SHA-256 checked before
 it is installed into the in-memory filesystem.

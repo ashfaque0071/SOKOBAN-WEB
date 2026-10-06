@@ -1,7 +1,7 @@
 # Sokoban
 
 A detective-noir Sokoban puzzle game written in C99 with
-[raylib](https://www.raylib.com/). The game includes 48 levels, scoring and
+[raylib](https://www.raylib.com/). The game includes 49 levels, scoring and
 star ratings, undo and hint systems, level selection, persistent progress,
 configurable movement, music, and sound effects.
 
@@ -179,7 +179,7 @@ build\sokoban.exe
 | Context | Input | Action |
 | --- | --- | --- |
 | Menus | Left click | Select menu items and on-screen controls |
-| Level select | Arrow keys, Page Up/Down, mouse wheel, or page buttons | Browse the three pages of levels |
+| Level select | Arrow keys, Page Up/Down, mouse wheel, or page buttons | Browse the four pages of levels |
 | Gameplay | Arrow keys or `W`, `A`, `S`, `D` | Move the player and push crates |
 | Gameplay | `U` | Undo one move |
 | Gameplay | `R` | Restart the current level |

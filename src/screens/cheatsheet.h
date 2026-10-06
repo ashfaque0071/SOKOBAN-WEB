@@ -25,8 +25,8 @@ typedef struct CheatStep {
 typedef struct CheatRoute {
     CheatStep step[CHEAT_MAX_STEPS];
     int stepCount;
-    int optimalMoves;
-    int optimalPushes;
+    int routeMoves;
+    int routePushes;
 } CheatRoute;
 
 typedef struct CheatsheetState {

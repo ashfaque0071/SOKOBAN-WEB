@@ -20,8 +20,27 @@
 #define SETTINGS_PATH "data/settings.txt"
 #endif
 
-#define PROGRESS_VERSION 2
+#define PROGRESS_VERSION 3
 #define SETTINGS_VERSION 1
+
+/* Version 3 orders the original 48 levels by their verified route length.
+   Translate older index-based saves so completed levels and records stay
+   attached to the same boards after the reorder. */
+static int ProgressIndexForVersion(int version, int index)
+{
+    static const unsigned char version2ToVersion3[48] = {
+        0, 1, 2, 3, 4, 6, 11, 15,
+        17, 19, 26, 27, 34, 37, 44, 47,
+        10, 16, 24, 25, 32, 36, 42, 46,
+        9, 13, 23, 20, 31, 35, 41, 45,
+        7, 12, 22, 18, 30, 33, 39, 43,
+        5, 8, 21, 14, 28, 29, 38, 40
+    };
+
+    if (version < 3)
+        return index >= 0 && index < 48 ? version2ToVersion3[index] : -1;
+    return index;
+}
 
 #if defined(PLATFORM_WEB)
 /* An IDBFS write only reaches memory; syncfs is what commits it to IndexedDB
@@ -74,10 +93,14 @@ void LoadProgress(int *currentLevel)
     int count = 0;
     if (fscanf(file, "%i %i", &level, &count) == 2)
     {
-        if (level >= 0 && level < LEVEL_COUNT)
-            *currentLevel = level;
-        if (count > LEVEL_COUNT)
-            count = LEVEL_COUNT;
+        int mappedLevel = ProgressIndexForVersion(version, level);
+        if (mappedLevel >= 0 && mappedLevel < LEVEL_COUNT)
+            *currentLevel = mappedLevel;
+        int maximumCount = version < 3 ? 48 : LEVEL_COUNT;
+        if (count < 0)
+            count = 0;
+        if (count > maximumCount)
+            count = maximumCount;
         for (int i = 0; i < count; i++)
         {
             int score = 0;
@@ -92,7 +115,9 @@ void LoadProgress(int *currentLevel)
                 ScoreSetRecord(i, score, stars, 0, 0);
                 break;
             }
-            ScoreSetRecord(i, score, stars, pushes, moves);
+            int mappedIndex = ProgressIndexForVersion(version, i);
+            if (mappedIndex >= 0 && mappedIndex < LEVEL_COUNT)
+                ScoreSetRecord(mappedIndex, score, stars, pushes, moves);
         }
     }
 

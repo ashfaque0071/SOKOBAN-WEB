@@ -376,7 +376,7 @@ void SettingsDefaults(SettingsState *state)
 {
     SettingsState fresh = {0};
     fresh.masterSoundOn = true;
-    fresh.musicVolume = 0.65f;
+    fresh.musicVolume = 0.0f;
     fresh.effectsVolume = 0.80f;
     fresh.holdToRepeat = 1;
     fresh.speedIndex = 1;

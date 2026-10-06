@@ -60,7 +60,7 @@ static Music   music;
 static Music   menuMusic;
 static bool    menuMusicActive = false;
 
-static float musicVolume = 0.65f;
+static float musicVolume = 0.0f;
 static float effectsVolume = 0.80f;
 static bool  muted = false;
 
@@ -154,6 +154,7 @@ void AudioInit(void)
     {
         menuMusic.looping = true;
         menuMusicActive = true;
+        SetMusicVolume(menuMusic, musicVolume);
         PlayMusicStream(menuMusic);
     }
 #if !defined(PLATFORM_WEB)

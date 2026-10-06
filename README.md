@@ -1,7 +1,7 @@
 # Sokoban
 
 A detective-noir Sokoban puzzle game written in C99 with
-[raylib](https://www.raylib.com/). The game includes 49 levels, scoring and
+[raylib](https://www.raylib.com/). The game includes 100 levels, scoring and
 star ratings, undo and hint systems, level selection, persistent progress,
 configurable movement, music, and sound effects.
 
@@ -144,8 +144,8 @@ upload the contents of `build/web/` to any static host. The build also creates
 - **Quit ends the session rather than closing the window.** A tab cannot close
   itself, so Quit saves, stops the game and returns the page to its title
   screen with the option to play again.
-- **The level-skip keys are disabled.** `[` and `]` are a development aid and
-  stay out of the public build.
+- **Level-skip keys are available.** `[` loads the previous level and `]`
+  loads the next level in both desktop and web builds.
 - **The game waits behind a Play button.** Browsers refuse to start audio
   before the user interacts with the page.
 
@@ -179,7 +179,7 @@ build\sokoban.exe
 | Context | Input | Action |
 | --- | --- | --- |
 | Menus | Left click | Select menu items and on-screen controls |
-| Level select | Arrow keys, Page Up/Down, mouse wheel, or page buttons | Browse the four pages of levels |
+| Level select | Arrow keys, Page Up/Down, mouse wheel, or page buttons | Browse the seven pages of levels |
 | Gameplay | Arrow keys or `W`, `A`, `S`, `D` | Move the player and push crates |
 | Gameplay | `U` | Undo one move |
 | Gameplay | `R` | Restart the current level |

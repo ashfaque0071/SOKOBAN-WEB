@@ -10,6 +10,7 @@ CHEATS = (ROOT / "src/screens/cheatsheet.c").read_text()
 SCORE = (ROOT / "src/core/score.c").read_text()
 HEADER = (ROOT / "src/core/board.h").read_text()
 COUNT = int(re.search(r"#define LEVEL_COUNT (\d+)", HEADER).group(1))
+assert COUNT == 100, "the built-in campaign must contain exactly 100 levels"
 ROWS, COLS = 10, 15
 
 board_data = BOARD.split("char levels[LEVEL_COUNT][ROWS][COLS + 1] = {", 1)[1].split(
@@ -28,6 +29,10 @@ route_entries = re.findall(
 assert len(route_entries) == COUNT, "wrong number of solution routes"
 route_moves = [int(moves) for _, moves, _ in route_entries]
 assert route_moves == sorted(route_moves), "levels are not ordered by route length"
+route_difficulty = [(int(moves), int(pushes)) for _, moves, pushes in route_entries]
+assert route_difficulty == sorted(route_difficulty), (
+    "equal-length routes are not ordered by push count"
+)
 assert route_moves[-1] > 900, "missing the 900+ move marathon level"
 
 score_data = SCORE.split("MINIMUM_PUSHES[LEVEL_COUNT] = {", 1)[1].split("};", 1)[0]

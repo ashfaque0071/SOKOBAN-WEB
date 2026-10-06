@@ -113,8 +113,25 @@ static const struct {
     },
 
     {
+        "U2 L4 D3 R2 U L2 U2 R4 D2 L3 R3 U2 L2 D U R2 D2 L2 D L2 U R2 U2 L2 D ",
+        51, 10
+    },
+
+    {
         "U R U L4 D L2 U2 R D L D R U R4 D2 L U R U L3 D L2 U2 R D R3 D2 R D2 L3 U2 ",
         51, 14
+    },
+
+    {
+        "D R3 U2 L U D R2 U L U L2 U L2 D R D2 L D2 R U D R3 U4 L2 U L D R3 D2 L U R U "
+        "L2 ",
+        52, 14
+    },
+
+    {
+        "U2 R2 D2 U2 L2 D2 R L U2 R2 D R D2 L R U2 L U L2 D2 R2 D R2 D2 L2 U L U R U3 "
+        "L2 D2 R ",
+        53, 8
     },
 
     {
@@ -125,6 +142,18 @@ static const struct {
     {
         "U D R3 U3 L4 D R D5 R U2 L U3 R U R2 D3 L2 D L U2 D R3 U3 L2 D R U L3 D R ",
         56, 10
+    },
+
+    {
+        "L U L U2 R D R D U L2 D R D2 R2 U R U2 L2 R2 D2 L2 D L U R3 U2 L3 R3 D2 L2 U "
+        "D R2 U2 L2 ",
+        56, 11
+    },
+
+    {
+        "L U L U3 R3 D L U L2 D4 R3 U L U2 D2 L D L U3 D2 R2 U2 R U L D3 L2 U2 R L D2 "
+        "R2 U2 ",
+        57, 11
     },
 
     {
@@ -139,15 +168,69 @@ static const struct {
     },
 
     {
+        "D L U R2 U2 L2 U R D R D2 L2 U D R2 U2 L U L2 D R D2 R2 U2 R U L2 R D3 L2 U2 "
+        "R U R D L3 U R D R2 D ",
+        60, 10
+    },
+
+    {
+        "R U R U2 L U L2 D L D2 R D R2 U2 D2 L2 U2 D2 R2 U3 D3 L2 U R D R U L2 U2 D2 "
+        "R3 U2 L2 R2 D2 L U ",
+        61, 12
+    },
+
+    {
+        "U4 R2 D L U L3 U2 R D L D R L D2 L2 U R D R U D R2 D2 L U R U L2 U L2 D R U R "
+        "U R U2 L D R D R D R2 U L ",
+        61, 14
+    },
+
+    {
+        "D3 R D L R3 U L2 D L U L2 D R3 U L U2 R U2 L D4 L D R U R3 D2 L U R U L3 D R "
+        "U R D L4 U R3 ",
+        62, 23
+    },
+
+    {
+        "U R D U R2 D U L2 D R U R2 D3 L3 U L U2 R2 D R U L3 D R U R3 D U L3 D3 R2 U R "
+        "U2 L D U L2 D R2 U R D ",
+        64, 13
+    },
+
+    {
         "D R3 U4 L3 D3 L D R4 U R2 D2 L U R U L D L4 U2 R D L D R3 U R2 D2 L U L3 U2 L "
         "U2 R3 D2 ",
         64, 15
     },
 
     {
+        "R D3 L D L3 U2 R3 U R U2 L D3 L3 D2 R3 U R U2 D2 L D L3 U2 R3 U R D U L U2 R "
+        "D L D4 L U D L2 U2 R3 ",
+        70, 15
+    },
+
+    {
         "R U4 L3 D2 R2 D R U2 D L3 U3 R4 D L D5 L U2 R U3 L U L2 D3 R2 D R U2 D L3 U3 "
         "R2 D L U R3 D L ",
         71, 13
+    },
+
+    {
+        "D3 L3 D L D2 R U L3 U2 R2 L2 D R U R4 D R U2 D L5 D2 R U L U R4 U R D U L U2 "
+        "R D L D2 L3 D2 R U L U R3 ",
+        72, 22
+    },
+
+    {
+        "R D L D2 R D2 L U3 D2 R3 U L D L2 U3 R U L D4 R2 U L D L U3 R D L D2 R2 U L D "
+        "L U R U2 L2 U D R2 D2 L U R U2 L R D L ",
+        73, 21
+    },
+
+    {
+        "R2 D U L4 D R D2 R D R3 U L2 D L2 U4 R2 D R D U2 L3 D4 R4 U L D L3 U L2 D R3 "
+        "L U4 R2 D L U L D3 L D R ",
+        75, 16
     },
 
     {
@@ -163,9 +246,27 @@ static const struct {
     },
 
     {
+        "R D3 L R U R D R D2 L2 U D R2 U L U L U3 L2 D2 L D2 R U2 L U2 R3 D3 L R2 D2 L "
+        "U R U L U3 L3 D2 R D U L U2 R3 D3 L R U3 L2 D ",
+        82, 14
+    },
+
+    {
         "U L2 U L2 D2 R U L U R D3 R2 U R3 D2 L2 U D R2 U2 L2 U L2 R2 D2 L3 U2 D2 R D "
         "R U2 R3 D2 L D L U2 D R2 U2 L2 U L2 R2 D2 L U R U L ",
         82, 21
+    },
+
+    {
+        "D R4 D2 L U R U L3 D R U L U L2 D2 R D3 U3 L U2 R D4 L D R U4 R2 D L U R3 D "
+        "L2 U L2 D3 R D U L2 D R U4 R2 D L U L D3 ",
+        82, 26
+    },
+
+    {
+        "D R4 D2 L U D R D2 L U R U3 L D R D2 L U R U2 L3 U L2 D R4 U R D3 L D R U L U "
+        "R U L3 U L2 D R4 U R D2 L D2 R2 L2 U2 R D L D R ",
+        82, 27
     },
 
     {
@@ -181,9 +282,27 @@ static const struct {
     },
 
     {
+        "R U2 L3 U2 L2 D2 R L U2 R2 D2 R3 D2 L U R U L3 U2 L2 D2 R4 U R D L3 D2 L2 D2 "
+        "R2 U4 L2 U2 R2 D U L2 D2 R4 D R U D2 R2 U L ",
+        85, 27
+    },
+
+    {
         "U R2 D L2 D L3 U2 R4 D R U2 R U L3 R2 D3 L2 D L2 U L U R4 D R U2 R U L2 R D3 "
         "L2 D L U L U R3 D R U2 R U L D R2 D L2 D L2 U R D R U2 ",
         86, 33
+    },
+
+    {
+        "L2 U L D2 U L2 D R2 U R5 D3 L5 U2 L U R2 L D3 R5 U3 L2 D L2 R2 U R2 D3 L5 U2 "
+        "R U R2 D L4 U R2 D R2 U R L D L2 U R2 ",
+        88, 17
+    },
+
+    {
+        "L3 D L2 U R5 L4 U2 R3 D U L3 D2 R3 U2 L2 D U R2 D3 R2 U L R2 U2 L D R D2 L2 U "
+        "L D R3 U L D L2 U3 L2 D2 U2 R2 D2 L R D R2 U L ",
+        88, 18
     },
 
     {
@@ -205,10 +324,29 @@ static const struct {
     },
 
     {
+        "R D R2 U R D2 U L3 U L2 D R D U R3 U R2 D L D2 L3 D L2 U R U2 R3 U R2 D L D2 "
+        "R D2 L U R U L U2 L2 R2 D2 L R U2 L3 U L2 D R4 U R D3 R D2 L U R U L ",
+        93, 29
+    },
+
+    {
         "L2 U2 R2 D R D U L U L2 D2 R2 D R2 D R2 U2 L D R D L U3 L2 D L3 U2 R2 D U L2 "
         "D2 R2 D R2 L2 U2 R3 D2 U2 L U L D2 L3 U2 R U R D2 U L2 D2 R2 D R2 L2 U2 R D L "
         "D R ",
         100, 24
+    },
+
+    {
+        "L4 U L2 D R D L3 R2 U2 L D L D2 L2 U R L U R3 U R2 D R U L3 D R U R2 D R L U "
+        "L2 D R L4 D2 R U L U R2 U R2 D R U L3 D R D L U L2 D2 R U L U R D R2 U R D L3 "
+        "U R2 ",
+        100, 30
+    },
+
+    {
+        "D R2 U2 L2 U L2 D R U L U L2 D2 R L U2 R2 D R D R2 L U L2 U L2 D R D R3 D2 R2 "
+        "U4 D4 L2 U2 R L D2 R2 U2 L5 U2 R D L D R3 D2 R2 U3 D3 L2 U2 R L D2 R2 U2 ",
+        103, 23
     },
 
     {
@@ -219,15 +357,41 @@ static const struct {
     },
 
     {
+        "U2 L4 U2 R D3 U R2 U L D R3 U L2 D R D4 L4 U2 R U2 L U2 R D L D R3 U R D4 U3 "
+        "L3 D2 L D2 R3 D R2 U L2 R U5 L2 D L2 U2 R D3 U R3 D4 L3 D L U2 ",
+        107, 25
+    },
+
+    {
+        "R3 U3 L2 D R2 D2 L4 U2 R2 U R4 D L U L D2 U2 L2 D L2 D2 R4 U3 L2 D R U R D L4 "
+        "D2 R6 D R2 U L6 D L2 U3 R4 D U L4 D3 R2 U R2 L2 D L2 U R2 ",
+        109, 22
+    },
+
+    {
         "L U L2 D R3 D2 L D2 R U3 R7 D2 R2 U2 L R D2 L2 U2 L4 U2 L2 D L2 U L2 D R3 D "
         "R7 U2 R2 D2 L R U2 L2 D2 U2 R U2 L D2 R2 D2 L6 U2 L2 D L D R6 ",
         109, 44
     },
 
     {
+        "L D3 R L U3 R3 D2 L D3 U2 L2 U R L U2 R D2 U2 R2 D2 L D3 L D R2 L U4 R U2 L2 "
+        "D L D2 R L U3 R3 D2 L D L2 U2 R D R D3 L D2 R2 U L D R3 U L D L2 U5 L2 D R U "
+        "R D3 ",
+        110, 21
+    },
+
+    {
         "R2 D R2 U L3 U2 R U2 L D3 L7 U2 L2 D2 R L U2 R2 D2 R4 D2 R2 U R2 D R2 U L3 U "
         "L7 D2 L2 U2 R L D2 R2 U2 D2 L D2 R U2 L2 U2 R6 D2 R2 U R U L6 ",
         110, 45
+    },
+
+    {
+        "L U3 R4 D R2 U L5 U L D2 L D2 R3 U2 D2 L3 U2 R U R4 D L U L3 D L D2 R3 U2 D2 "
+        "L3 U2 R D U2 R2 D R2 U L D R3 U L D L2 U L D R3 U L D L2 U L U L D2 U R2 D R2 "
+        "U L3 U L D ",
+        114, 28
     },
 
     {
@@ -250,10 +414,43 @@ static const struct {
     },
 
     {
+        "R D2 R2 U2 L2 D2 R4 U5 R2 D3 L R U3 L2 D3 L2 D2 R2 U2 D2 L4 U2 R2 D2 L4 U2 R2 "
+        "D2 R4 U4 D4 L2 U2 R L D2 R2 U2 D2 L4 U2 R2 D2 R2 U3 D3 L2 U2 R L D2 R2 U2 ",
+        121, 21
+    },
+
+    {
+        "U L2 D U L2 D L2 U R4 U R2 D4 L4 U2 L U R D3 R3 U R U3 L2 D4 L2 U3 R L D3 R3 "
+        "D2 L U R U2 R U3 L2 D2 U L2 D3 R2 L2 U3 R2 D2 R2 U2 L U L D R2 D2 L D L D2 R "
+        "U L U2 R2 U2 L2 D2 ",
+        123, 27
+    },
+
+    {
+        "U L2 D R U R2 D2 U2 L2 D L D5 R10 U5 L3 D2 L3 D L2 U R4 D R U2 D L4 U3 L2 D R "
+        "U R D2 U L3 D5 R10 U5 L2 U L2 D R3 L2 D2 L3 D L2 U R4 D R U2 ",
+        124, 21
+    },
+
+    {
+        "D R U R U R3 L3 U L D R D2 L2 U L U R D2 R2 U2 R3 D R U2 D L4 D2 L2 U2 R3 L3 "
+        "D R U R5 L5 D2 R2 U D L2 U2 R3 L3 D R U R3 D R2 U2 L D U R2 U2 L2 D U R2 D L "
+        "D2 L5 D2 R U L U R3 ",
+        124, 30
+    },
+
+    {
         "U R2 D2 R2 U L D L3 D L U R U L4 U L2 D2 R U L U R2 D R4 U R U2 L D2 R2 D R D "
         "L3 D L U R7 U L3 R2 U2 L3 D L2 U2 R D R D2 R D L3 U L4 U L2 D2 R U R5 D2 L U "
         "R U L3 R U L D L2 D L U ",
         124, 40
+    },
+
+    {
+        "L2 U L U2 R D R D U L2 D2 R D R2 U L U L R D2 L U L U D R2 U L U2 L U2 R D R "
+        "D L R D2 L D2 R2 U L D L U R U4 L U2 R D L D3 R D2 L U R U2 L U2 R D4 L D2 R2 "
+        "U L U L U D R D2 L U R U2 L U R U L D2 R D2 L U4 R U L ",
+        125, 31
     },
 
     {
@@ -278,10 +475,155 @@ static const struct {
     },
 
     {
+        "U L2 D L4 U L D U L2 D R6 D R3 U2 L2 D U R2 D2 L2 U L7 D2 R U L U R U R2 D R4 "
+        "D L U L3 U L2 D R5 D R3 U2 L2 D L D L U R2 U R2 D2 L3 U L5 D2 R U L U R5 D R3 "
+        "U2 L2 D U R2 D2 L2 ",
+        131, 29
+    },
+
+    {
+        "L D2 L D2 R2 U L D L U R U3 R U2 L5 D5 R3 D R U3 D2 R2 U L D L U D L4 U5 R5 "
+        "D2 L2 R2 U2 L5 D5 R4 U2 D2 L2 U R D R U D L4 U5 R5 D2 L R U2 L5 D5 R2 U R2 U ",
+        132, 21
+    },
+
+    {
+        "L D2 R U D R2 U L2 D L U3 R U L2 R D R2 D U L2 D3 R3 U L2 D L U R2 U2 L U L3 "
+        "U L D3 L D2 R U R U L U2 R3 D R2 D2 L2 U2 R U L D R2 D L U2 L3 U L D3 R D2 L2 "
+        "U R D R U L U3 R3 D R D2 L U2 R U L3 U L D4 L D R ",
+        132, 39
+    },
+
+    {
+        "L D L2 U2 L U L U2 R3 D2 L2 R2 U2 L2 D U R2 D L D4 R2 U R2 D L3 D L U4 R U2 L "
+        "D2 U2 L2 D R U R2 D2 L D L U R2 U2 L3 D L D R U2 R3 D2 L D3 U3 R U2 L D2 U2 "
+        "L2 D R U R2 D2 L D2 U2 R U2 L D3 U2 L2 D R U R D ",
+        133, 30
+    },
+
+    {
         "L2 D L3 U2 R2 D U L2 D2 L2 U R D R3 D R U L U R4 U R2 D2 L U R U L2 D L4 U L "
         "U2 R D2 L2 D L D R3 D R U L7 U R3 L2 U2 R3 D R2 U2 L D L D2 L D R3 U R4 U R2 "
         "D2 L U L5 D2 R U L U R3 L U R D R2 D R U ",
         135, 43
+    },
+
+    {
+        "L U L D3 R2 L2 U2 R2 D R3 U R2 D2 L U R U L D L4 U L2 D2 R D2 R2 U2 D2 L2 U2 "
+        "L U2 R2 D R D3 L2 U2 R U R4 U R D L3 U R2 D L4 D L D2 R2 U2 L U R D L4 D R U "
+        "R3 D2 L2 U L U R2 U R3 U R D L4 D L D2 R2 U2 L U R4 ",
+        141, 34
+    },
+
+    {
+        "D4 R U L U4 R2 D2 L R U2 L2 D4 R D L D L2 U5 R L D5 R2 U4 R2 U2 L2 D4 U3 L3 U "
+        "L2 D R4 L D5 R3 U2 L D L D L U2 D R2 U3 R2 U2 L2 D4 R D L2 D L U R3 D L2 U R "
+        "U R U L U3 R2 D2 L R U2 L2 D4 R D L2 ",
+        147, 35
+    },
+
+    {
+        "U L3 D R U R2 D R2 D2 L7 U2 R U R2 D R U L3 D R U R2 D R2 L U L3 D L2 D2 R7 "
+        "U2 L2 U L3 D R3 L5 D2 R7 U4 D4 L7 U2 R6 L6 D2 R7 U3 R U2 L D U2 L2 D R D R D "
+        "U L U2 R D R D2 L D U R U2 L D ",
+        156, 22
+    },
+
+    {
+        "U R3 U R3 D R2 D2 L2 U D R2 U2 L U D R D2 L2 U2 R U L2 R U2 R D2 L D3 R2 U2 L "
+        "U L3 U L D R D L U R4 D R D2 L U L U D R2 U L U L3 D L2 R2 U2 L D R D L U R4 "
+        "D2 L U R U L3 D3 L3 U3 D3 R3 U2 L2 R2 U2 L D R D3 L3 U L U2 R D R2 L2 U L U2 "
+        "R D2 L D R D L D R2 ",
+        165, 37
+    },
+
+    {
+        "U4 L R D4 L2 U2 R U R D U3 L D R D3 U L2 D2 R D R2 U L U4 L D R D3 L2 U L2 D2 "
+        "R U R U2 R U R D2 U L2 D2 R D R2 U L2 R U5 L3 D R U R D2 R D3 L2 U L2 D2 R U "
+        "R U2 R U R D2 U L2 D2 L2 U2 R3 U R D L2 D2 R D R2 U L3 U2 R2 D U L2 D2 R D R2 "
+        "U L2 R U2 L4 D R L D2 R U L U2 R4 D2 L3 D L U ",
+        186, 41
+    },
+
+    {
+        "L D2 R D U L U2 R D R3 D L D3 R2 U2 L R D2 L2 U2 R2 D L U3 L4 D2 R U D L D2 R "
+        "U2 L U2 R3 U R D3 L U R U L3 R2 D2 R2 D2 L2 U2 R2 D L U3 L3 U L D3 R U L U R3 "
+        "U R D3 L U R U L3 R2 D2 R2 D2 L2 U2 R2 D L U3 L3 U L D2 U R4 D2 L U R U L3 R2 "
+        "D2 R D2 L U R U3 L3 U L D R3 D R D2 L U2 R U L3 ",
+        191, 52
+    },
+
+    {
+        "U R2 U4 L U L2 D5 R3 U2 L U D R D2 L3 U3 R2 L2 U2 R2 D R D4 R D L U L2 D2 L U "
+        "R U R2 U4 L U L2 D R D R D R D2 L2 D L U R3 D L U R U2 L U L U2 R D R D4 R D "
+        "L U L3 U3 R U2 L2 D R2 D R L U2 R D R D3 U3 L2 D L D3 R3 L3 D2 R U L U4 R2 D "
+        "R D3 L U R U2 L U2 R D4 L D R U4 L3 D4 R L U R ",
+        195, 47
+    },
+
+    {
+        "R U R2 U R3 D4 L R U2 L D U R U2 L D L R2 D2 L U R U2 L2 D L2 R U R3 D5 L U2 "
+        "R U2 L U L2 D L D L3 U2 R2 D R2 U R2 D L R2 D2 L U R U2 L2 D L2 R U R3 D L U "
+        "L2 D L D L2 D L U L U2 R3 D R2 U R2 D L3 R3 D4 L2 U R D R U3 R U L U L2 D L D "
+        "L2 D L2 U3 R3 D R2 U R2 D L3 D2 L2 U L U L U R D3 L U2 D2 R4 U L U D L D L U2 ",
+        202, 44
+    },
+
+    {
+        "L U R L U2 R D L3 U R U2 L U R4 D R2 U2 L D R D L2 U L2 D L D3 R2 U L D L U2 "
+        "D3 R D R U L U2 L U2 L U R4 D R2 U2 L D L D L U R3 D L U L4 D5 R D R3 U L2 D "
+        "L U L U2 R2 D U L2 D2 R U L U4 R4 D L U L3 D4 R2 U L D L U2 D3 R D R2 U L D L "
+        "U2 L U3 L U R4 D R2 U2 L D R D L U L4 D4 R2 U L D L U3 L U R5 U R D ",
+        205, 53
+    },
+
+    {
+        "D L7 U L D R3 U L D R3 U L D L7 U2 R D L D R4 L U L D R3 U L2 D L3 U2 R D L D "
+        "R3 U L R3 D R2 U L4 D R2 L5 U2 R D L D R3 U L D L2 U2 R D L D R U R6 D R U L3 "
+        "D R U L3 D R U L3 D R U R8 D R2 U L10 D L2 U2 R D R3 D L U R3 D L U R3 D L U "
+        "R3 D L U L4 D L U R3 D L U R3 D L U L2 D L U R3 D L2 ",
+        216, 59
+    },
+
+    {
+        "D4 R2 U L D L U3 D2 R5 U L D R3 U L D L6 U2 R U R5 D2 R D L4 R U R D L3 D L2 "
+        "U3 R U R5 D2 R D L2 U R U2 L5 D L D3 R2 U2 R3 L2 D L D L2 U3 R U R5 D2 U2 L5 "
+        "D L2 U R2 D L D3 R2 U L D L U3 R U R3 L3 D L2 U R2 D L D2 R2 U R3 D L U R3 D "
+        "L U L2 D L3 D L U3 R U R2 L2 D L2 U R2 D L D2 R2 U R4 D L5 D L U3 R U R L D "
+        "L2 U R2 ",
+        233, 55
+    },
+
+    {
+        "D R L U2 R D R2 U L D3 U5 L4 D6 R6 D R2 U L7 D L U5 D4 R4 U3 L2 D R U R D2 U5 "
+        "L5 D2 R D4 R6 D R2 U L6 R2 U3 L2 U R D2 R D2 L2 D L2 U5 L U2 R5 D5 U5 L5 D2 R "
+        "U L U R D7 R2 U L D L U5 L U2 R3 L3 D2 R U L U R D6 R6 D R2 U L7 D L U5 L U2 "
+        "R2 L2 D2 R U L U R ",
+        237, 68
+    },
+
+    {
+        "U R3 L3 D2 R2 L2 U2 R4 D5 L3 U2 L U3 R3 U2 R D R6 L7 D L3 D3 R D2 R2 U R U4 "
+        "L4 D3 R2 U R L D L D2 R2 U R U3 D L2 D L2 U3 R3 U R3 L3 D L3 D2 R2 L2 U2 R3 U "
+        "R6 L6 D L3 D3 R D2 R2 U R U4 L4 D2 R3 L D L D2 R2 U R U3 D L4 U2 R3 U R5 L5 D "
+        "L3 D2 R4 U2 L U R3 D L U L2 D L3 D2 R4 U2 L U R D R2 U R L D L2 U R2 ",
+        250, 41
+    },
+
+    {
+        "U R6 D3 L2 U L2 D R3 L2 D2 R D2 L U3 D2 L2 D L2 U R3 L2 U2 L U2 R D U3 R6 D3 "
+        "U3 L6 D4 U4 R6 D5 U5 L6 D5 U5 R6 D3 L2 U L2 D R3 L2 D2 R D2 L U3 D2 L2 D L2 U "
+        "R3 L2 U6 R6 D4 U L2 U L2 D R3 L2 D2 R D2 L U L3 U6 R6 D3 U3 L6 D6 R3 U2 D2 L3 "
+        "U6 R6 D3 L2 U L2 D R3 ",
+        255, 44
+    },
+
+    {
+        "D L6 D R2 L2 D2 L U R U2 R5 U2 L8 D4 R2 D R U L3 U4 R8 D2 L6 D R U R5 U2 L8 "
+        "D4 R2 D R U2 L U R6 U R D3 U2 L4 D L U L2 D2 R U L U R5 L2 D L2 D L3 U4 R8 D "
+        "R D3 R D2 L2 U R D R U2 L U4 L9 D4 R2 U2 R6 U R D3 U2 L2 D L3 U L2 D2 R U L U "
+        "R5 D L4 D L3 U4 R8 D R D3 R D L U3 R D2 U2 L U2 L9 D4 R2 U2 R6 U R D3 ",
+        289, 50
     },
 
     {

@@ -20,12 +20,12 @@
 #define SETTINGS_PATH "data/settings.txt"
 #endif
 
-#define PROGRESS_VERSION 3
-#define SETTINGS_VERSION 1
+#define PROGRESS_VERSION 4
+#define SETTINGS_VERSION 2
 
-/* Version 3 orders the original 48 levels by their verified route length.
-   Translate older index-based saves so completed levels and records stay
-   attached to the same boards after the reorder. */
+/* Versions 3 and 4 reordered and expanded the campaign. Translate older
+   index-based saves so completed levels and records stay attached to the
+   same boards after each reorder. */
 static int ProgressIndexForVersion(int version, int index)
 {
     static const unsigned char version2ToVersion3[48] = {
@@ -36,9 +36,20 @@ static int ProgressIndexForVersion(int version, int index)
         7, 12, 22, 18, 30, 33, 39, 43,
         5, 8, 21, 14, 28, 29, 38, 40
     };
+    static const unsigned char version3ToVersion4[49] = {
+        0, 1, 2, 3, 4, 5, 6, 7,
+        8, 9, 10, 11, 12, 13, 14, 15,
+        16, 17, 18, 19, 21, 24, 25, 28,
+        29, 35, 37, 41, 42, 44, 47, 48,
+        50, 53, 54, 55, 57, 60, 63, 65,
+        67, 68, 69, 74, 76, 77, 78, 83,
+        99
+    };
 
     if (version < 3)
-        return index >= 0 && index < 48 ? version2ToVersion3[index] : -1;
+        index = index >= 0 && index < 48 ? version2ToVersion3[index] : -1;
+    if (version < 4)
+        index = index >= 0 && index < 49 ? version3ToVersion4[index] : -1;
     return index;
 }
 
@@ -96,7 +107,7 @@ void LoadProgress(int *currentLevel)
         int mappedLevel = ProgressIndexForVersion(version, level);
         if (mappedLevel >= 0 && mappedLevel < LEVEL_COUNT)
             *currentLevel = mappedLevel;
-        int maximumCount = version < 3 ? 48 : LEVEL_COUNT;
+        int maximumCount = version < 3 ? 48 : (version < 4 ? 49 : LEVEL_COUNT);
         if (count < 0)
             count = 0;
         if (count > maximumCount)
@@ -146,7 +157,8 @@ void LoadSettings(SettingsState *state)
         return;
 
     int version = 0;
-    if (fscanf(file, "%i", &version) != 1 || version != SETTINGS_VERSION)
+    if (fscanf(file, "%i", &version) != 1 ||
+        version < 1 || version > SETTINGS_VERSION)
     {
         fclose(file);
         return;
@@ -158,7 +170,10 @@ void LoadSettings(SettingsState *state)
     if (fscanf(file, "%i %f %f", &sound, &music, &effects) == 3)
     {
         state->masterSoundOn = (sound != 0);
-        state->musicVolume = Clamp(music, 0.0f, 1.0f);
+        /* Version 2 changes the shipped default to silent music. Apply that
+           once to existing settings so returning browser players get the new
+           behavior too; they can still raise the slider afterward. */
+        state->musicVolume = version < 2 ? 0.0f : Clamp(music, 0.0f, 1.0f);
         state->effectsVolume = Clamp(effects, 0.0f, 1.0f);
     }
 

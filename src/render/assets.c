@@ -14,6 +14,28 @@ Texture2D LoadTile(const char *fileName)
 
 void AssetsLoad(Assets *asset)
 {
+    asset->texPauseButtonNormal = LoadTile("assets/shared/button_normal.png");
+    asset->texPauseButtonHover = LoadTile("assets/shared/button_hover.png");
+    asset->texPauseIconContinue = LoadTile("assets/shared/icon_continue.png");
+    asset->texPauseIconSettings = LoadTile("assets/shared/icon_settings.png");
+    asset->texMenuBackground = LoadTile("assets/menu/menu_background.png");
+    asset->texMenuTitle = LoadTile("assets/menu/title_logo.png");
+    asset->texMenuPanel = LoadTile("assets/menu/menu_panel_large.png");
+    asset->texMenuTextContinue = LoadTile("assets/menu/menu_text_continue.png");
+    asset->texMenuTextLevelSelect = LoadTile("assets/menu/menu_text_level_select.png");
+    asset->texMenuTextSettings = LoadTile("assets/menu/menu_text_settings.png");
+    asset->texMenuTextQuit = LoadTile("assets/menu/menu_text_quit.png");
+    asset->fontNoir = LoadFontEx("assets/fonts/Rye-Regular.ttf", 96, 0, 0);
+    SetTextureFilter(asset->fontNoir.texture, TEXTURE_FILTER_BILINEAR);
+    asset->fontCondensed = LoadFontEx("assets/fonts/Oswald-Bold.ttf", 96, 0, 0);
+    SetTextureFilter(asset->fontCondensed.texture, TEXTURE_FILTER_BILINEAR);
+#if !defined(PLATFORM_WEB)
+    AssetsLoadDeferred(asset);
+#endif
+}
+
+void AssetsLoadDeferred(Assets *asset)
+{
     asset->texWall = LoadTile("assets/gameplay/tiles/wall_brick.png");
     asset->texWallCap = LoadTile("assets/gameplay/tiles/wall_cap.png");
     asset->texFloorA = LoadTile("assets/gameplay/tiles/floor_cobble_a.png");
@@ -33,11 +55,7 @@ void AssetsLoad(Assets *asset)
     asset->texUiButton = LoadTile("assets/gameplay/ui/ui_button_noir.png");
     asset->texUiIcons = LoadTile("assets/gameplay/ui/ui_icons.png");
     asset->texPausePanel = LoadTile("assets/pause/pause_panel.png");
-    asset->texPauseButtonNormal = LoadTile("assets/shared/button_normal.png");
-    asset->texPauseButtonHover = LoadTile("assets/shared/button_hover.png");
-    asset->texPauseIconContinue = LoadTile("assets/shared/icon_continue.png");
     asset->texPauseIconRestart = LoadTile("assets/shared/icon_restart.png");
-    asset->texPauseIconSettings = LoadTile("assets/shared/icon_settings.png");
     asset->texPauseIconHome = LoadTile("assets/shared/icon_home.png");
     asset->texPauseTextTitle = LoadTile("assets/pause/pause_text_case_paused.png");
     asset->texPauseTextResume = LoadTile("assets/pause/pause_text_resume.png");
@@ -54,13 +72,6 @@ void AssetsLoad(Assets *asset)
     asset->texStarFilled = LoadTile("assets/completion/star_filled.png");
     asset->texStarEmpty = LoadTile("assets/completion/star_empty.png");
     asset->texGameBackground = LoadTile("assets/gameplay/screen_main_menu.png");
-    asset->texMenuBackground = LoadTile("assets/menu/menu_background.png");
-    asset->texMenuTitle = LoadTile("assets/menu/title_logo.png");
-    asset->texMenuPanel = LoadTile("assets/menu/menu_panel_large.png");
-    asset->texMenuTextContinue = LoadTile("assets/menu/menu_text_continue.png");
-    asset->texMenuTextLevelSelect = LoadTile("assets/menu/menu_text_level_select.png");
-    asset->texMenuTextSettings = LoadTile("assets/menu/menu_text_settings.png");
-    asset->texMenuTextQuit = LoadTile("assets/menu/menu_text_quit.png");
     asset->texLevelsBackground = LoadTile("assets/levels/screen_level_select_decorated.png");
     asset->texLevelsBanner = LoadTile("assets/levels/case_files_banner.png");
     asset->texLevelsCardLocked = LoadTile("assets/levels/card_locked.png");
@@ -93,14 +104,14 @@ void AssetsLoad(Assets *asset)
     asset->texSetKeepPressed = LoadTile("assets/settings/confirm_keep_pressed.png");
     asset->texSetConfirmPanelV2 = LoadTile("assets/settings/reset_confirmation_panel_v2.png");
 
-    asset->fontNoir = LoadFontEx("assets/fonts/Rye-Regular.ttf", 96, 0, 0);
-    SetTextureFilter(asset->fontNoir.texture, TEXTURE_FILTER_BILINEAR);
-    asset->fontCondensed = LoadFontEx("assets/fonts/Oswald-Bold.ttf", 96, 0, 0);
-
     asset->fontSlab = LoadFontEx("assets/fonts/RobotoSlab-ExtraBold.ttf", 120, 0, 0);
     SetTextureFilter(asset->fontSlab.texture, TEXTURE_FILTER_BILINEAR);
-    SetTextureFilter(asset->fontCondensed.texture, TEXTURE_FILTER_BILINEAR);
+#if defined(PLATFORM_WEB)
+    /* WebGL speaks GLSL ES 1.00, not the desktop GLSL 3.30 of blur.fs. */
+    asset->shaderBlur = LoadShader(0, "assets/shaders/blur_es.fs");
+#else
     asset->shaderBlur = LoadShader(0, "assets/shaders/blur.fs");
+#endif
 }
 
 void AssetsUnload(Assets *asset)

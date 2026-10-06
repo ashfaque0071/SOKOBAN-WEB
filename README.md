@@ -1,7 +1,7 @@
 # Sokoban
 
 A detective-noir Sokoban puzzle game written in C99 with
-[raylib](https://www.raylib.com/). The game includes 16 levels, scoring and
+[raylib](https://www.raylib.com/). The game includes 48 levels, scoring and
 star ratings, undo and hint systems, level selection, persistent progress,
 configurable movement, music, and sound effects.
 
@@ -84,6 +84,71 @@ to it, and starts the game. raylib headers, the MinGW import library, and the
 runtime DLL required by the Windows build are already included in `include\`
 and `lib\`.
 
+### Browser (WebAssembly)
+
+The game also builds to WebAssembly and runs in a browser with no install.
+This build needs more than the native one:
+
+| Requirement | Install |
+| --- | --- |
+| [Emscripten SDK](https://emscripten.org) | `git clone https://github.com/emscripten-core/emsdk.git ~/emsdk && cd ~/emsdk && ./emsdk install latest && ./emsdk activate latest` |
+| raylib built for the web | See below |
+| `oxipng`, `pngquant`, `ffmpeg` | `brew install oxipng pngquant ffmpeg` |
+
+raylib must be built with **OpenGL ES 3**, not ES 2:
+
+```sh
+curl -L -o raylib.tar.gz https://github.com/raysan5/raylib/archive/refs/tags/6.0.tar.gz
+tar xzf raylib.tar.gz && cd raylib-6.0/src
+make PLATFORM=PLATFORM_WEB GRAPHICS=GRAPHICS_API_OPENGL_ES3
+```
+
+On an ES 2 / WebGL 1 context raylib finds no vertex-array-object support and
+falls back to a per-draw path that binds a vertex attribute the default shader
+does not have, logging two WebGL warnings for every batch and collapsing the
+frame rate.
+
+Then, from the repository root:
+
+```sh
+RAYLIB_WEB=/path/to/raylib-6.0/src ./run_web.sh
+```
+
+The script resizes the assets, compiles to `build/web/`, and serves the game on
+<http://localhost:8080>. Set `EMSDK` if the SDK is not at `~/emsdk`. Pass
+`--build-only` to skip the server.
+
+The `.wasm` and `.data` files must be served over HTTP; opening
+`build/web/index.html` as a `file://` URL will not work. To publish the game,
+upload the contents of `build/web/` to any static host. The build also creates
+`sokoban-web.zip` for itch.io. See `README-WEB.md` for Vercel deployment.
+
+#### How the browser build differs
+
+- **Assets are resized and staged.** `tools/stage_web_assets.sh` writes a
+  reduced copy of `assets/` for packaging. The menu download is about 2.32 MiB;
+  another 8.10 MiB arrives in the background after it appears. Choosing content
+  before that download finishes shows progress and waits. Source art is
+  authored far larger than the game draws it: board
+  tiles are 1254px square but capped at 68px on screen. `assets/` is never
+  modified, and the native builds keep using it.
+
+  This is only safe because the game derives every source rectangle from the
+  texture's own dimensions rather than from baked pixel offsets. Anything that
+  slices a texture by absolute pixels will break when that texture ships at a
+  different size, so keep such rectangles expressed as fractions (see
+  `DrawUiIcon` in `src/screens/hud.c` and `PauseInk` in `src/render/ui.c`).
+- **Saves live in the browser.** Progress, settings, and personal bests go to IndexedDB through
+  Emscripten's IDBFS, mounted at `/data`, instead of `data/*.txt`. They survive
+  reloads but are per-browser and per-domain, and are cleared with the site's data.
+- **Quit ends the session rather than closing the window.** A tab cannot close
+  itself, so Quit saves, stops the game and returns the page to its title
+  screen with the option to play again.
+- **The level-skip keys are disabled.** `[` and `]` are a development aid and
+  stay out of the public build.
+- **The game waits behind a Play button.** Browsers refuse to start audio
+  before the user interacts with the page.
+
 ## Compiling without immediately running
 
 Both provided scripts accept `--build-only` as their first argument.
@@ -114,6 +179,7 @@ build\sokoban.exe
 | Context | Input | Action |
 | --- | --- | --- |
 | Menus | Left click | Select menu items and on-screen controls |
+| Level select | Arrow keys, Page Up/Down, mouse wheel, or page buttons | Browse the three pages of levels |
 | Gameplay | Arrow keys or `W`, `A`, `S`, `D` | Move the player and push crates |
 | Gameplay | `U` | Undo one move |
 | Gameplay | `R` | Restart the current level |
@@ -170,6 +236,7 @@ build script copies it automatically.
 ├── assets/          Textures, fonts, shaders, music, and sound effects
 ├── build/           Compiled executable and Windows runtime DLL
 ├── data/            Persistent progress and settings
+├── docs/            Level cheatsheet and third-party license notices
 ├── include/         Bundled raylib 5.5 headers for the Windows build
 ├── lib/             Bundled Windows raylib libraries and DLL
 ├── src/
@@ -199,8 +266,8 @@ Key modules include:
 - `src/screens/`: menu, settings, pause, level-select, completion, controls,
   credits, high-score, and cheatsheet screens.
 
-The in-game Cheatsheets screen provides a solution reference for each unlocked
-level.
+The optional solution reference in `docs/LEVEL_CHEATSHEET.md` lists a complete
+move sequence for every level.
 
 ## Troubleshooting
 
@@ -250,7 +317,15 @@ Check that master sound is enabled and both volume sliders are above zero in
 Settings. Also verify that the operating system has an active audio output
 device. The music and sound-effect files are loaded from `assets/audio/`.
 
-## Third-party components
+## Third-party notices
 
-The repository bundles raylib 5.5 headers and libraries for Windows. The
-included raylib headers retain their upstream license notice.
+The bundled Windows headers and libraries are raylib 5.5. Its license is in
+`docs/licenses/raylib_LICENSE.txt`. Font license notices are stored beside the
+fonts:
+
+- `assets/fonts/LICENSE-RobotoSlab.txt`
+- `assets/fonts/OFL-Oswald.txt`
+- `assets/fonts/OFL-Rye.txt`
+
+No separate license for the remaining project code or assets is declared in
+this repository.

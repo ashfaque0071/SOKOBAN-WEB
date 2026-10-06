@@ -2,15 +2,43 @@
 
 #include <stdio.h>
 
+#if defined(PLATFORM_WEB)
+#include <emscripten.h>
+#endif
+
 #include "raymath.h"
 #include "board.h"
 #include "score.h"
 
+#if defined(PLATFORM_WEB)
+/* The browser build mounts IndexedDB at /data, so the save paths stay
+   absolute there rather than depending on the working directory. */
+#define PROGRESS_PATH "/data/progress.txt"
+#define SETTINGS_PATH "/data/settings.txt"
+#else
 #define PROGRESS_PATH "data/progress.txt"
 #define SETTINGS_PATH "data/settings.txt"
+#endif
 
 #define PROGRESS_VERSION 2
 #define SETTINGS_VERSION 1
+
+#if defined(PLATFORM_WEB)
+/* An IDBFS write only reaches memory; syncfs is what commits it to IndexedDB
+   so the save survives a page reload. */
+static void SavesCommit(void)
+{
+    /* emscripten_run_script rather than EM_ASM, which needs a GNU dialect and
+       would split the web build off the project's -std=c99. This runs once per
+       save, so the eval costs nothing that matters. */
+    emscripten_run_script(
+        "FS.syncfs(false, function (err) {"
+        "  if (err) console.error('sokoban: save sync failed', err);"
+        "});");
+}
+#else
+#define SavesCommit() ((void)0)
+#endif
 
 void SaveProgress(int currentLevel)
 {
@@ -25,6 +53,7 @@ void SaveProgress(int currentLevel)
                 LevelBestPushes(i), LevelBestMoves(i));
 
     fclose(file);
+    SavesCommit();
 }
 
 void LoadProgress(int *currentLevel)
@@ -82,6 +111,7 @@ void SaveSettings(const SettingsState *state)
     fprintf(file, "%i %i\n", state->holdToRepeat, state->speedIndex);
 
     fclose(file);
+    SavesCommit();
 }
 
 void LoadSettings(SettingsState *state)

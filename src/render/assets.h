@@ -100,6 +100,7 @@ typedef struct Assets {
 } Assets;
 
 void AssetsLoad(Assets *assets);
+void AssetsLoadDeferred(Assets *assets);
 void AssetsUnload(Assets *assets);
 
 #endif

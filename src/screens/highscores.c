@@ -290,7 +290,7 @@ void HighScoresDraw(Assets *asset, const HighScoresLayout *layout,
 
     float titleCenterX = layout->title.x + layout->title.width / 2.0f;
     float titleSize = layout->title.height * 0.62f;
-    DrawSheetTextCentered(asset->fontCondensed, "CASE PERFORMANCE",
+    DrawSheetTextCentered(asset->fontCondensed, "PERSONAL BESTS",
                           titleCenterX,
                           layout->title.y + layout->title.height * 0.50f,
                           titleSize, SHEET_INK);
@@ -345,6 +345,19 @@ void HighScoresDraw(Assets *asset, const HighScoresLayout *layout,
                 hovered == HIGHSCORE_CONTROL_PREV, state->page > 0);
     DrawPageTab(asset, layout->nextTab, "NEXT", false,
                 hovered == HIGHSCORE_CONTROL_NEXT, state->page < pageCount - 1);
+
+#if defined(PLATFORM_WEB)
+    Rectangle storageNote = {
+        layout->screen.width * 0.19f, layout->screen.height * 0.874f,
+        layout->screen.width * 0.62f, layout->screen.height * 0.038f
+    };
+    DrawRectangleRounded(storageNote, 0.18f, 6, Fade(BLACK, 0.78f));
+    DrawSheetTextCentered(asset->fontCondensed,
+        "SAVED IN THIS BROWSER - DOES NOT TRANSFER BETWEEN DEVICES OR DOMAINS",
+        layout->screen.width * 0.5f,
+        storageNote.y + storageNote.height * 0.5f,
+        storageNote.height * 0.62f, RAYWHITE);
+#endif
 
     Texture2D plate = hovered == HIGHSCORE_CONTROL_BACK
         ? asset->texPauseButtonHover

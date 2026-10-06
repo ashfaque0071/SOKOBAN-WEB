@@ -5,9 +5,17 @@
 #include "screen.h"
 #include "ui.h"
 
-int LevelSelectSlotCount(void)
+int LevelSelectPageCount(void)
 {
-    return LEVEL_COUNT < LEVEL_SLOTS ? LEVEL_COUNT : LEVEL_SLOTS;
+    return (LEVEL_COUNT + LEVEL_SLOTS - 1) / LEVEL_SLOTS;
+}
+
+int LevelSelectSlotCount(int page)
+{
+    int remaining = LEVEL_COUNT - page * LEVEL_SLOTS;
+    if (remaining <= 0)
+        return 0;
+    return remaining < LEVEL_SLOTS ? remaining : LEVEL_SLOTS;
 }
 
 LevelSelectLayout LevelSelectGetLayout(Assets *asset)
@@ -65,23 +73,36 @@ LevelSelectLayout LevelSelectGetLayout(Assets *asset)
     layout.cheatsheetsButton = (Rectangle){
         shelfX + shelfWidth + shelfGap, shelfY, shelfWidth, shelfHeight
     };
+    layout.prevPageButton = (Rectangle){
+        SCREEN_W * 0.125f, shelfY + shelfHeight * 0.12f,
+        SCREEN_W * 0.125f, shelfHeight * 0.76f
+    };
+    layout.nextPageButton = (Rectangle){
+        SCREEN_W * 0.750f, shelfY + shelfHeight * 0.12f,
+        SCREEN_W * 0.125f, shelfHeight * 0.76f
+    };
+    layout.pageLabel = (Rectangle){
+        SCREEN_W * 0.432f, SCREEN_H * 0.965f,
+        SCREEN_W * 0.136f, SCREEN_H * 0.028f
+    };
     return layout;
 }
 
-LevelSelectHover LevelSelectHitTest(const LevelSelectLayout *layout,
+LevelSelectHover LevelSelectHitTest(const LevelSelectLayout *layout, int page,
                                     Vector2 mouse)
 {
-    LevelSelectHover hover = {-1, -1, -1, false, false};
-    int shown = LevelSelectSlotCount();
+    LevelSelectHover hover = {-1, -1, -1, false, false, false, false};
+    int shown = LevelSelectSlotCount(page);
 
     for (int i = 0; i < shown; i++)
     {
         if (!CheckCollisionPointRec(mouse, layout->card[i]))
             continue;
-        if (LevelUnlocked(i))
-            hover.card = i;
+        int index = page * LEVEL_SLOTS + i;
+        if (LevelUnlocked(index))
+            hover.card = index;
         else
-            hover.lockedCard = i;
+            hover.lockedCard = index;
     }
 
     if (CheckCollisionPointRec(mouse, layout->highScoresButton))
@@ -91,12 +112,17 @@ LevelSelectHover LevelSelectHitTest(const LevelSelectLayout *layout,
 
     hover.back = CheckCollisionPointRec(mouse, layout->backButton);
     hover.controls = CheckCollisionPointRec(mouse, layout->controlsButton);
+    hover.prevPage = page > 0 &&
+        CheckCollisionPointRec(mouse, layout->prevPageButton);
+    hover.nextPage = page < LevelSelectPageCount() - 1 &&
+        CheckCollisionPointRec(mouse, layout->nextPageButton);
     return hover;
 }
 
 bool LevelSelectHoveringControl(LevelSelectHover hover)
 {
-    return hover.card >= 0 || hover.shelf >= 0 || hover.back || hover.controls;
+    return hover.card >= 0 || hover.shelf >= 0 || hover.back ||
+           hover.controls || hover.prevPage || hover.nextPage;
 }
 
 static void DrawBoardButton(Assets *asset, Rectangle button, Texture2D icon,
@@ -121,7 +147,7 @@ static void DrawBoardButton(Assets *asset, Rectangle button, Texture2D icon,
     float labelX = iconX + iconWidth + button.width * 0.055f;
 
     float room = button.x + button.width * 0.88f - labelX;
-    Vector2 widest = MeasureTextEx(asset->fontCondensed, "CHEATSHEETS",
+    Vector2 widest = MeasureTextEx(asset->fontCondensed, "PERSONAL BESTS",
                                    size, spacing);
     if (widest.x > room)
     {
@@ -135,6 +161,20 @@ static void DrawBoardButton(Assets *asset, Rectangle button, Texture2D icon,
     DrawTextEx(asset->fontCondensed, label,
                (Vector2){labelX, button.y + (button.height - measured.y) / 2.0f},
                size, spacing, (Color){32, 28, 24, 255});
+}
+
+static void DrawPageButton(Assets *asset, Rectangle button,
+                           const char *label, bool hovered)
+{
+    Texture2D plate = hovered
+        ? asset->texPauseButtonHover
+        : asset->texPauseButtonNormal;
+    DrawPaperPlate(plate, PauseInk(plate, 0.023f, 0.153f, 0.960f, 0.692f),
+                   button);
+    DrawFontCenteredInRectangle(
+        asset->fontCondensed, label, button, button.height * 0.42f, 0.5f,
+        (Color){32, 28, 24, 255}, 0
+    );
 }
 
 static void DrawLevelStars(Assets *asset, Rectangle card, int stars)
@@ -234,7 +274,7 @@ static void DrawLevelCard(const Board *board, Assets *asset, Rectangle card,
 }
 
 void LevelSelectDraw(const Board *board, Assets *asset,
-                     const LevelSelectLayout *layout,
+                     const LevelSelectLayout *layout, int page,
                      LevelSelectHover hover)
 {
 
@@ -247,15 +287,28 @@ void LevelSelectDraw(const Board *board, Assets *asset,
                    hover.controls);
 
     DrawBoardButton(asset, layout->highScoresButton,
-                    asset->texLevelsStarGold, "HIGH SCORES",
+                    asset->texLevelsStarGold, "PERSONAL BESTS",
                     hover.shelf == LEVEL_SHELF_HIGH_SCORES);
     DrawBoardButton(asset, layout->cheatsheetsButton,
                     asset->texLevelsIconMap, "CHEATSHEETS",
                     hover.shelf == LEVEL_SHELF_CHEATSHEETS);
 
-    int shown = LevelSelectSlotCount();
+    if (page > 0)
+        DrawPageButton(asset, layout->prevPageButton,
+                       "< PREV", hover.prevPage);
+    if (page < LevelSelectPageCount() - 1)
+        DrawPageButton(asset, layout->nextPageButton,
+                       "NEXT >", hover.nextPage);
+    DrawFontCenteredInRectangle(
+        asset->fontNoir,
+        TextFormat("PAGE %i / %i", page + 1, LevelSelectPageCount()),
+        layout->pageLabel, layout->pageLabel.height * 0.88f, 0.5f,
+        (Color){31, 27, 24, 255}, 0
+    );
+
+    int shown = LevelSelectSlotCount(page);
     int earned = 0;
-    for (int i = 0; i < shown; i++)
+    for (int i = 0; i < LEVEL_COUNT; i++)
         earned += LevelBestStars(i);
 
     DrawWhole(asset->texLevelsStarTag, layout->starTag);
@@ -269,7 +322,7 @@ void LevelSelectDraw(const Board *board, Assets *asset,
     DrawWhole(asset->texLevelsStarGold,
               FitInside(asset->texLevelsStarGold, starBox));
     DrawFontCenteredInRectangle(
-        asset->fontNoir, TextFormat("%i / %i", earned, shown * 3),
+        asset->fontNoir, TextFormat("%i / %i", earned, LEVEL_COUNT * 3),
         (Rectangle){layout->starTag.x + layout->starTag.width * 0.34f,
                     layout->starTag.y + layout->starTag.height * 0.24f,
                     layout->starTag.width * 0.58f,
@@ -286,5 +339,9 @@ void LevelSelectDraw(const Board *board, Assets *asset,
     );
 
     for (int i = 0; i < shown; i++)
-        DrawLevelCard(board, asset, layout->card[i], i, i == hover.card);
+    {
+        int index = page * LEVEL_SLOTS + i;
+        DrawLevelCard(board, asset, layout->card[i], index,
+                      index == hover.card);
+    }
 }

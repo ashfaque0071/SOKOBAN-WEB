@@ -19,6 +19,9 @@ typedef struct LevelSelectLayout {
     Rectangle controlsButton;
     Rectangle highScoresButton;
     Rectangle cheatsheetsButton;
+    Rectangle prevPageButton;
+    Rectangle nextPageButton;
+    Rectangle pageLabel;
 } LevelSelectLayout;
 
 typedef struct LevelSelectHover {
@@ -27,17 +30,20 @@ typedef struct LevelSelectHover {
     int shelf;
     bool back;
     bool controls;
+    bool prevPage;
+    bool nextPage;
 } LevelSelectHover;
 
 LevelSelectLayout LevelSelectGetLayout(Assets *asset);
 
-int LevelSelectSlotCount(void);
-LevelSelectHover LevelSelectHitTest(const LevelSelectLayout *layout,
+int LevelSelectPageCount(void);
+int LevelSelectSlotCount(int page);
+LevelSelectHover LevelSelectHitTest(const LevelSelectLayout *layout, int page,
                                     Vector2 mouse);
 
 bool LevelSelectHoveringControl(LevelSelectHover hover);
 void LevelSelectDraw(const Board *board, Assets *asset,
-                     const LevelSelectLayout *layout,
+                     const LevelSelectLayout *layout, int page,
                      LevelSelectHover hover);
 
 #endif

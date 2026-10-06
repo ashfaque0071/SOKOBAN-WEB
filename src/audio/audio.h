@@ -19,6 +19,7 @@ typedef enum {
 } SfxId;
 
 void AudioInit(void);
+void AudioLoadDeferred(void);
 
 void AudioShutdown(void);
 

@@ -5,6 +5,7 @@
 #include "board.h"
 #include "colors.h"
 #include "score.h"
+#include "web_input.h"
 #include "screen.h"
 #include "ui.h"
 
@@ -409,8 +410,8 @@ void SettingsDraw(Assets *asset, const SettingsLayout *layout,
 SettingsResult SettingsUpdate(const SettingsLayout *layout,
                               SettingsState *state, Vector2 mouse)
 {
-    bool leftMousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
-    bool leftMouseHeld = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
+    bool leftMousePressed = InputPointerPressed();
+    bool leftMouseHeld = InputPointerDown();
 
     bool backHovered = CheckCollisionPointRec(mouse, layout->backButton);
     bool musicSliderHovered = CheckCollisionPointRec(mouse,
@@ -463,7 +464,7 @@ SettingsResult SettingsUpdate(const SettingsLayout *layout,
             result = SETTINGS_ERASED;
         }
         else if ((leftMousePressed && confirmationOptionHovered == 1) ||
-                 IsKeyPressed(KEY_ESCAPE))
+                 InputKeyPressed(KEY_ESCAPE))
         {
             state->showConfirmation = false;
         }
@@ -519,14 +520,14 @@ SettingsResult SettingsUpdate(const SettingsLayout *layout,
         state->effectsVolume = GetSliderValue(layout->effectsSlider, mouse.x);
         AudioSetEffectsVolume(state->effectsVolume);
     }
-    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT))
+    if (InputPointerReleased())
     {
         state->draggingMusicSlider = false;
         state->draggingEffectsSlider = false;
     }
 
     bool shouldClose = (leftMousePressed && backHovered) ||
-        IsKeyPressed(KEY_ESCAPE);
+        InputKeyPressed(KEY_ESCAPE);
     if (shouldClose)
     {
         state->draggingMusicSlider = false;

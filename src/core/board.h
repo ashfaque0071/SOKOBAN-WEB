@@ -7,7 +7,7 @@
 
 #define ROWS 10
 #define COLS 15
-#define LEVEL_COUNT 16
+#define LEVEL_COUNT 48
 
 #define FLOOR 0
 #define WALL 1

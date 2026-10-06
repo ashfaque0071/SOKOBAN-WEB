@@ -159,14 +159,30 @@ static void DrawUiIcon(Assets *asset, int column, int row,
         column * iconWidth, row * iconHeight, iconWidth, iconHeight
     };
 
+    /* Each icon sits inside its cell with its own margins. These were measured
+       off the 1537x1023 sheet and are kept as fractions of a cell, not pixel
+       counts, so the slices stay correct if the sheet ever ships at another
+       resolution (the browser build loads a smaller copy). */
     if (column == 0 && row == 0)
-        source = (Rectangle){141, 90, 305, 353};
+        source = (Rectangle){
+            iconWidth * 0.275211f, iconHeight * 0.175953f,
+            iconWidth * 0.595316f, iconHeight * 0.690127f
+        };
     else if (column == 1 && row == 0)
-        source = (Rectangle){iconWidth + 99, 111, 315, 324};
+        source = (Rectangle){
+            iconWidth + iconWidth * 0.193234f, iconHeight * 0.217009f,
+            iconWidth * 0.614834f, iconHeight * 0.633431f
+        };
     else if (column == 0 && row == 1)
-        source = (Rectangle){173, iconHeight + 74, 234, 295};
+        source = (Rectangle){
+            iconWidth * 0.337671f, iconHeight + iconHeight * 0.144673f,
+            iconWidth * 0.456734f, iconHeight * 0.576735f
+        };
     else if (column == 2 && row == 0)
-        source = (Rectangle){iconWidth * 2 + 106, 108, 257, 327};
+        source = (Rectangle){
+            iconWidth * 2 + iconWidth * 0.206897f, iconHeight * 0.211144f,
+            iconWidth * 0.501627f, iconHeight * 0.639296f
+        };
 
     float scaleX = destination.width / iconWidth;
     float scaleY = destination.height / iconHeight;

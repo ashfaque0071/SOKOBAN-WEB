@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sokoban</title>
+<style>
+  :root { color-scheme: dark; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #0b0a09;
+    color: #d8cfc2;
+    font-family: "Oswald", "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  #stage {
+    position: fixed;
+    inset: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  /* The game renders at a fixed 1512x880. The canvas keeps those pixel
+     dimensions and CSS scales it to fit, so the aspect ratio holds and
+     Emscripten can still map pointer coordinates back to game pixels. */
+  canvas#canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    aspect-ratio: 1512 / 880;
+    width: min(100%, calc(100vh * 1512 / 880));
+    width: min(100%, calc(100dvh * 1512 / 880));
+    height: auto;
+    background: #000;
+    outline: none;
+    /* Keep the browser from hijacking the arrow keys and space bar. */
+    touch-action: none;
+  }
+
+  #veil {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    gap: 1.5rem;
+    background: #0b0a09;
+    text-align: center;
+    padding: 2rem;
+    transition: opacity 240ms ease;
+    z-index: 3;
+  }
+
+  #veil.gone { opacity: 0; pointer-events: none; }
+
+  #veil h1 {
+    margin: 0 0 0.4rem;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  #veil p {
+    margin: 0.3rem 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.06em;
+    color: #8b8178;
+  }
+
+  #bar {
+    width: min(320px, 70vw);
+    height: 3px;
+    margin: 1.2rem auto 0;
+    background: #262220;
+    overflow: hidden;
+  }
+
+  #bar > span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: #c9a227;
+    transition: width 180ms ease;
+  }
+
+  #contentOverlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    place-items: center;
+    background: rgba(11, 10, 9, 0.92);
+    text-align: center;
+    padding: 2rem;
+    z-index: 2;
+  }
+  #contentOverlay.visible { display: grid; }
+  #contentOverlay strong { font-size: 1.4rem; letter-spacing: 0.1em; }
+  #contentOverlay p { color: #d8cfc2; }
+  #contentBar { width: min(360px, 75vw); height: 5px; margin: 1rem auto;
+    background: #3c342a; }
+  #contentBar span { display: block; width: 0; height: 100%;
+    background: #c9a227; }
+
+  #mobileUi { display: none; }
+  @media (pointer: coarse), (max-width: 900px) {
+    body.mobilePlaying #stage {
+      left: calc(env(safe-area-inset-left) + 178px);
+    }
+    #mobileUi {
+      position: fixed;
+      z-index: 1;
+      top: 50%;
+      right: auto;
+      bottom: auto;
+      left: max(8px, env(safe-area-inset-left));
+      width: 162px;
+      transform: translateY(-50%);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      gap: 12px;
+    }
+    #mobileUi button {
+      pointer-events: auto;
+      min-width: 48px;
+      min-height: 48px;
+      border: 1px solid #b79b66;
+      border-radius: 9px;
+      background: rgba(28, 24, 21, 0.91);
+      color: #f2e9d8;
+      font: 700 16px/1.1 Arial, sans-serif;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #mobileUi button:active, #mobileUi button.pressed {
+      background: #b79b66;
+      color: #17130f;
+    }
+    #mobileUi[data-screen="7"] { display: flex; }
+    #mobilePad { display: grid; grid-template-columns: repeat(3, 52px);
+      grid-template-rows: repeat(2, 52px); gap: 3px; }
+    #mobilePad button { padding: 0; font-size: 24px; }
+    #mobilePad .up { grid-column: 2; }
+    #mobilePad .left { grid-column: 1; grid-row: 2; }
+    #mobilePad .down { grid-column: 2; grid-row: 2; }
+    #mobilePad .right { grid-column: 3; grid-row: 2; }
+  }
+  @media (max-width: 650px) and (orientation: portrait) {
+    html, body { height: 100%; min-height: 100%; overflow: hidden; }
+    body.mobilePlaying #stage {
+      left: env(safe-area-inset-left);
+      bottom: calc(env(safe-area-inset-bottom) + 142px);
+    }
+    canvas#canvas {
+      width: min(100%, calc(100vh * 1512 / 880));
+      width: min(100%, calc(100dvh * 1512 / 880));
+    }
+    #mobileUi {
+      top: auto;
+      right: env(safe-area-inset-right);
+      bottom: env(safe-area-inset-bottom);
+      left: env(safe-area-inset-left);
+      width: auto;
+      height: 142px;
+      box-sizing: border-box;
+      padding: 12px;
+      transform: none;
+      align-items: center;
+      justify-content: center;
+      background: #15120f;
+    }
+    #mobilePad { grid-template-columns: repeat(3, 58px);
+      grid-template-rows: repeat(2, 58px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <canvas id="canvas" width="1512" height="880" tabindex="-1"
+          oncontextmenu="event.preventDefault()"></canvas>
+</div>
+
+<div id="mobileUi" data-screen="0" aria-label="Touch controls">
+  <div id="mobilePad" aria-label="Movement">
+    <button class="up" data-direction="1" aria-label="Move up">▲</button>
+    <button class="left" data-direction="3" aria-label="Move left">◀</button>
+    <button class="down" data-direction="2" aria-label="Move down">▼</button>
+    <button class="right" data-direction="4" aria-label="Move right">▶</button>
+  </div>
+</div>
+
+<div id="contentOverlay" role="status" aria-live="polite">
+  <div>
+    <strong>Opening case files</strong>
+    <p id="contentStatus">Downloading game content…</p>
+    <div id="contentBar"><span id="contentBarFill"></span></div>
+  </div>
+</div>
+
+<div id="veil">
+  <div>
+    <h1>Sokoban</h1>
+    <p id="status">Loading&hellip;</p>
+    <div id="bar"><span id="barFill"></span></div>
+    <p style="margin-top:1.6rem">On-screen controls on phones &middot; Arrow keys or WASD on desktop</p>
+  </div>
+</div>
+
+<script>
+// Browsers start every AudioContext suspended until the user interacts with
+// the page. raylib creates its context deep inside miniaudio with no handle we
+// can reach, so wrap the constructor before the game loads and keep every
+// context it makes; the Play click then resumes them.
+(function () {
+  window.__audioContexts = [];
+  ["AudioContext", "webkitAudioContext"].forEach(function (name) {
+    var Original = window[name];
+    if (!Original) return;
+    function Wrapped() {
+      var context = new (Function.prototype.bind.apply(
+        Original, [null].concat(Array.prototype.slice.call(arguments))))();
+      window.__audioContexts.push(context);
+      return context;
+    }
+    Wrapped.prototype = Original.prototype;
+    window[name] = Wrapped;
+  });
+})();
+</script>
+
+<script src="sokoban.js"></script>
+<script>
+(function () {
+  var veil = document.getElementById("veil");
+  var status = document.getElementById("status");
+  var barFill = document.getElementById("barFill");
+  var bar = document.getElementById("bar");
+  var canvas = document.getElementById("canvas");
+  var contentOverlay = document.getElementById("contentOverlay");
+  var contentStatus = document.getElementById("contentStatus");
+  var contentBarFill = document.getElementById("contentBarFill");
+  var mobileUi = document.getElementById("mobileUi");
+  var contentModule = null;
+  var contentPromise = null;
+  var contentWanted = false;
+  var contentAttempts = 0;
+  var contentRetryTimer = null;
+  window.sokobanContentReady = false;
+
+  // Canvas pointer events are passed to the C game once per frame. The
+  // snapshot suppresses raylib's mouse event so a tap opens one screen.
+  var touch = {x: 0, y: 0, down: false, pressed: false, released: false,
+               pointerId: null, suppressUntil: 0};
+  var heldDirection = 0;
+  var directionPressed = false;
+  var directionTap = 0;
+
+  function locateTouch(event) {
+    var rect = canvas.getBoundingClientRect();
+    touch.x = Math.max(0, Math.min(1511,
+      Math.round((event.clientX - rect.left) * 1512 / rect.width)));
+    touch.y = Math.max(0, Math.min(879,
+      Math.round((event.clientY - rect.top) * 880 / rect.height)));
+    touch.suppressUntil = Date.now() + 800;
+  }
+  canvas.addEventListener("pointerdown", function (event) {
+    event.preventDefault();
+    if (touch.pointerId !== null) return;
+    touch.pointerId = event.pointerId;
+    locateTouch(event);
+    touch.down = true;
+    touch.pressed = true;
+    canvas.setPointerCapture(event.pointerId);
+  });
+  canvas.addEventListener("pointermove", function (event) {
+    if (event.pointerId !== touch.pointerId) return;
+    event.preventDefault();
+    locateTouch(event);
+  });
+  function endCanvasTouch(event) {
+    if (event.pointerId !== touch.pointerId) return;
+    event.preventDefault();
+    locateTouch(event);
+    touch.down = false;
+    touch.released = true;
+    touch.pointerId = null;
+  }
+  canvas.addEventListener("pointerup", endCanvasTouch);
+  canvas.addEventListener("pointercancel", endCanvasTouch);
+
+  document.querySelectorAll("#mobilePad button").forEach(function (button) {
+    var direction = Number(button.dataset.direction);
+    button.addEventListener("pointerdown", function (event) {
+      event.preventDefault();
+      button.setPointerCapture(event.pointerId);
+      heldDirection = direction;
+      directionPressed = true;
+      button.classList.add("pressed");
+    });
+    function release(event) {
+      event.preventDefault();
+      if (heldDirection === direction) {
+        heldDirection = 0;
+        if (directionPressed) directionTap = direction;
+      }
+      button.classList.remove("pressed");
+    }
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+  });
+
+  window.sokobanInputSnapshot = function () {
+    var direction = heldDirection || directionTap;
+    var result = touch.x | (touch.y << 11) |
+      (touch.pressed ? 1 << 21 : 0) |
+      (touch.down ? 1 << 22 : 0) |
+      (touch.released ? 1 << 23 : 0) |
+      (Date.now() < touch.suppressUntil ? 1 << 24 : 0) |
+      (direction << 25) |
+      ((directionPressed || directionTap) ? 1 << 28 : 0);
+    touch.pressed = false;
+    touch.released = false;
+    directionPressed = false;
+    directionTap = 0;
+    return result;
+  };
+  window.sokobanMobileScreen = function (screen) {
+    mobileUi.dataset.screen = String(screen);
+    document.body.classList.toggle("mobilePlaying", screen === 7);
+  };
+
+  function updateContentProgress(loaded, total) {
+    var percent = Math.min(100, Math.round(loaded / total * 100));
+    contentBarFill.style.width = percent + "%";
+    contentStatus.textContent = "Downloading game content… " + percent + "%";
+  }
+
+  async function downloadContent() {
+    var manifestResponse = await fetch("content.json", {cache: "no-cache"});
+    if (!manifestResponse.ok) throw new Error("Content manifest unavailable");
+    var manifest = await manifestResponse.json();
+    var response = await fetch("content.data", {cache: "no-cache"});
+    if (!response.ok) throw new Error("Game content unavailable");
+    var bytes = new Uint8Array(manifest.size);
+    var loaded = 0;
+    if (response.body && response.body.getReader) {
+      var reader = response.body.getReader();
+      while (true) {
+        var result = await reader.read();
+        if (result.done) break;
+        if (loaded + result.value.length > bytes.length)
+          throw new Error("Content exceeds expected size");
+        bytes.set(result.value, loaded);
+        loaded += result.value.length;
+        updateContentProgress(loaded, bytes.length);
+      }
+    } else {
+      bytes.set(new Uint8Array(await response.arrayBuffer()));
+      loaded = bytes.length;
+      updateContentProgress(loaded, bytes.length);
+    }
+    if (loaded !== bytes.length) throw new Error("Incomplete game content");
+    if (crypto.subtle) {
+      var hash = await crypto.subtle.digest("SHA-256", bytes);
+      var actual = Array.from(new Uint8Array(hash), function (b) {
+        return b.toString(16).padStart(2, "0");
+      }).join("");
+      if (actual !== manifest.sha256) throw new Error("Game content checksum failed");
+    }
+    manifest.files.forEach(function (file) {
+      var slash = file.path.lastIndexOf("/");
+      contentModule.FS.mkdirTree(file.path.slice(0, slash));
+      contentModule.FS.writeFile(file.path, bytes.subarray(file.start, file.end));
+    });
+    window.sokobanContentReady = true;
+    contentStatus.textContent = "Preparing game…";
+  }
+
+  // A failed download retries itself with a widening delay, so there is no
+  // retry button to press. The delay is capped so a player who regains
+  // connectivity is never left waiting long.
+  function startContentDownload() {
+    if (contentRetryTimer !== null) {
+      window.clearTimeout(contentRetryTimer);
+      contentRetryTimer = null;
+    }
+    if (contentPromise || !contentModule || window.sokobanContentReady) return;
+    contentAttempts += 1;
+    var delay = Math.min(15000, 1000 * Math.pow(2, contentAttempts - 1));
+    contentPromise = downloadContent().catch(function (err) {
+      console.error("sokoban: content download failed", err);
+      contentPromise = null;
+      if (contentWanted) {
+        contentStatus.textContent = "Download failed. Retrying in " +
+          Math.round(delay / 1000) + "s…";
+      }
+      contentRetryTimer = window.setTimeout(function () {
+        contentRetryTimer = null;
+        if (contentWanted) contentStatus.textContent = "Retrying download…";
+        startContentDownload();
+      }, delay);
+    });
+  }
+
+  window.sokobanRequireContent = function () {
+    contentWanted = true;
+    contentOverlay.classList.add("visible");
+    if (window.sokobanContentReady) contentStatus.textContent = "Preparing game…";
+    startContentDownload();
+  };
+  window.sokobanPreparingContent = function () {
+    contentStatus.textContent = "Preparing game…";
+    contentBarFill.style.width = "100%";
+  };
+  window.sokobanContentPrepared = function () {
+    contentOverlay.classList.remove("visible");
+    canvas.focus();
+  };
+
+  function setProgress(fraction) {
+    barFill.style.width = Math.round(Math.max(0, Math.min(1, fraction)) * 100) + "%";
+  }
+
+  // Browsers only let audio start from a user gesture, and the tab cannot
+  // close itself, so the veil waits for the player's first tap or key press
+  // and that gesture does the work the Play button used to do. The veil sits
+  // above the canvas, so the game never sees this first tap.
+  var readyAction = null;
+
+  function armVeil(message, action) {
+    status.textContent = message;
+    readyAction = action;
+  }
+
+  function veilInteraction() {
+    if (readyAction === null) return;
+    var action = readyAction;
+    readyAction = null;
+    action();
+  }
+
+  ["pointerdown", "keydown"].forEach(function (name) {
+    window.addEventListener(name, veilInteraction);
+  });
+
+  function start() {
+    veil.classList.add("gone");
+    canvas.focus();
+    (window.__audioContexts || []).forEach(function (context) {
+      if (context.state === "suspended") {
+        context.resume().catch(function (err) {
+          console.warn("sokoban: could not start audio", err);
+        });
+      }
+    });
+    window.setTimeout(function () {
+      if (veil.classList.contains("gone")) veil.remove();
+    }, 300);
+  }
+
+  // Called from the game when the player picks Quit. The tab cannot close
+  // itself, so the page comes back with the option to start again.
+  window.sokobanQuit = function () {
+    bar.style.display = "none";
+    if (!document.body.contains(veil)) document.body.appendChild(veil);
+    veil.classList.remove("gone");
+    armVeil("Progress saved. Tap or press a key to play again.", function () {
+      window.location.reload();
+    });
+  };
+
+  window.addEventListener("error", function (event) {
+    readyAction = null;
+    status.textContent = "Something went wrong loading the game.";
+    console.error(event.error || event.message);
+  });
+
+  createSokoban({
+    canvas: canvas,
+    setStatus: function (text) {
+      // Emscripten reports asset download progress as "... (12/34)".
+      var match = /\((\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)\)/.exec(text || "");
+      if (match) {
+        setProgress(parseFloat(match[1]) / parseFloat(match[2]));
+        status.textContent = "Loading assets…";
+      } else if (text) {
+        status.textContent = text;
+      }
+    },
+    print: function (text) { console.log(text); },
+    printErr: function (text) { console.error(text); },
+  }).then(function (module) {
+    contentModule = module;
+    startContentDownload();
+    setProgress(1);
+    armVeil("Tap or press a key to play", start);
+  }).catch(function (err) {
+    readyAction = null;
+    status.textContent = "Something went wrong loading the game.";
+    console.error(err);
+  });
+})();
+</script>
+</body>
+</html>

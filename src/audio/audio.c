@@ -40,7 +40,13 @@ static const SfxDef SFX_DEFS[SFX_COUNT] = {
 
 #define MUSIC_PATH "assets/audio/music/bgmus.mp3"
 
+/* The browser build ships the menu theme as MP3: 22 seconds of 44.1kHz stereo
+   PCM is 3.8MB of download for no audible gain. */
+#if defined(PLATFORM_WEB)
+#define MENU_MUSIC_PATH "assets/audio/music/finale.mp3"
+#else
 #define MENU_MUSIC_PATH "assets/audio/music/finale.wav"
+#endif
 
 typedef struct {
     Sound voice[SFX_MAX_VOICES];
@@ -89,12 +95,8 @@ static void MusicRoomFilter(void *buffer, unsigned int frames)
     }
 }
 
-void AudioInit(void)
+static void LoadSfx(int id)
 {
-    InitAudioDevice();
-
-    for (int id = 0; id < SFX_COUNT; id++)
-    {
         const SfxDef *def = &SFX_DEFS[id];
         SfxSlot *slot = &sfx[id];
 
@@ -106,7 +108,7 @@ void AudioInit(void)
         if (slot->voice[0].frameCount == 0)
         {
             TraceLog(LOG_WARNING, "AUDIO: could not load %s", def->path);
-            continue;
+            return;
         }
 
         int wanted = def->voices;
@@ -117,8 +119,13 @@ void AudioInit(void)
             slot->voice[v] = LoadSoundAlias(slot->voice[0]);
             slot->voiceCount++;
         }
-    }
+}
 
+void AudioLoadDeferred(void)
+{
+    for (int id = 0; id < SFX_COUNT; id++)
+        if (id != SFX_UI_HOVER && id != SFX_UI_CLICK)
+            LoadSfx(id);
     music = LoadMusicStream(MUSIC_PATH);
     if (music.frameCount == 0)
     {
@@ -130,13 +137,18 @@ void AudioInit(void)
         AttachAudioStreamProcessor(music.stream, MusicRoomFilter);
     }
 
+}
+
+void AudioInit(void)
+{
+    InitAudioDevice();
+    LoadSfx(SFX_UI_HOVER);
+    LoadSfx(SFX_UI_CLICK);
     menuMusic = LoadMusicStream(MENU_MUSIC_PATH);
     if (menuMusic.frameCount == 0)
     {
         TraceLog(LOG_WARNING, "AUDIO: could not load %s", MENU_MUSIC_PATH);
         menuMusicActive = false;
-        if (music.frameCount > 0)
-            PlayMusicStream(music);
     }
     else
     {
@@ -144,6 +156,9 @@ void AudioInit(void)
         menuMusicActive = true;
         PlayMusicStream(menuMusic);
     }
+#if !defined(PLATFORM_WEB)
+    AudioLoadDeferred();
+#endif
 }
 
 void AudioShutdown(void)

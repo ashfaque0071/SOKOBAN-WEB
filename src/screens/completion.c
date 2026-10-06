@@ -145,7 +145,9 @@ void CompletionDraw(const Board *board, Assets *asset,
     float photoRight = photoDestination.x + photoDestination.width;
     if (photoRight < SCREEN_W)
     {
-        float band = 160.0f;
+        /* A fraction of the plate, not a pixel count, so the filler strip
+           samples the same slice whatever resolution the art ships at. */
+        float band = asset->texCompletion.width * 0.03125f;
         Rectangle edgeSource = {
             asset->texCompletion.width - band, 0,
             band, (float)asset->texCompletion.height

@@ -1,4 +1,6 @@
 .DS_Store
-/build/
+/build/*
+!/build/web/
+!/build/web/**
 /data/
 /sokoban-web.zip

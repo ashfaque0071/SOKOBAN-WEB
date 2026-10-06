@@ -25,13 +25,8 @@
 #include "ui.h"
 #include "web_input.h"
 
-/* The level-skip keys are a development aid, so they stay out of the public
-   browser build. */
-#if defined(PLATFORM_WEB)
-#define DEV_LEVEL_SKIP 0
-#else
+/* Allow [ and ] to move to the previous or next level in every build. */
 #define DEV_LEVEL_SKIP 1
-#endif
 
 /* The browser drives the game one frame at a time through a callback, so the
    frame body cannot keep its working state in main's stack frame. Everything
